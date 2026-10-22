@@ -34,6 +34,7 @@ export default function SkyMap({
   zoom = 1,
   onZoomChange,
   nightMode = false,
+  expanded = false,
 }) {
   const uid = useId().replaceAll(':', '');
   const [catalog, setCatalog] = useState([]);
@@ -121,7 +122,7 @@ export default function SkyMap({
     <div className={`sky-map ${dragging ? 'is-dragging' : ''} ${nightMode ? 'sky-map-red' : ''}`}>
       <svg
         ref={svgRef}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        viewBox={expanded ? `175 0 550 ${HEIGHT}` : `0 0 ${WIDTH} ${HEIGHT}`}
         className="sky-map-svg"
         role="group"
         aria-label="แผนที่ดาวเหนือขอบฟ้า ทิศตะวันออกอยู่ด้านซ้ายเมื่อเงยหน้ามองท้องฟ้า ลากเพื่อหมุน หรือดับเบิลคลิกเพื่อคืนมุมมอง"

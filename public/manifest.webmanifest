@@ -1,0 +1,15 @@
+{
+  "id": "/Sky/",
+  "name": "Sky — ดูดาวบนท้องฟ้า",
+  "short_name": "Sky",
+  "lang": "th",
+  "start_url": "/Sky/",
+  "scope": "/Sky/",
+  "display": "standalone",
+  "background_color": "#090c15",
+  "theme_color": "#0a0d18",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
