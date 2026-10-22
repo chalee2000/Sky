@@ -1,0 +1,22 @@
+.sky-map { position: relative; width: 100%; min-width: 0; overflow: hidden; }
+.sky-map-svg { display: block; width: 100%; height: auto; min-height: 360px; max-height: 570px; cursor: grab; user-select: none; touch-action: pan-y; }
+.sky-map.is-dragging .sky-map-svg { cursor: grabbing; }
+.sky-map .map-star { cursor: pointer; outline: none; }
+.sky-map .map-star:focus-visible .star-hit-area { fill: rgba(172, 163, 255, .16); stroke: #b8b1ff; stroke-width: 1.2; }
+.sky-map .star-label { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: .2px; pointer-events: none; paint-order: stroke; stroke: #11172a; stroke-width: 3px; stroke-linejoin: round; }
+.sky-map .selected-label { font-size: 11px; font-weight: 500; }
+.sky-map .constellation-label { font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 500; letter-spacing: 2px; pointer-events: none; paint-order: stroke; stroke: #11172a; stroke-width: 2px; }
+.sky-map .compass-label { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 1px; font-weight: 500; }
+.sky-map .compass-label.north { font-weight: 700; }
+.map-orientation-note { position: absolute; left: 24px; bottom: 16px; display: flex; align-items: center; gap: 7px; font-size: 10px; color: #79839d; pointer-events: none; }
+.map-orientation-dot { width: 4px; height: 4px; border-radius: 50%; background: #8f87d5; }
+.sky-map .map-reset { position: absolute; right: 20px; bottom: 12px; display: flex; align-items: center; gap: 7px; border: 1px solid rgba(150, 157, 199, .12); border-radius: 6px; padding: 6px 10px; color: #929bb5; font: inherit; font-size: 10px; background: rgba(14, 18, 34, .7); cursor: pointer; }
+.sky-map .map-reset:hover { border-color: #8178bd; color: #e2dcff; }
+.sky-map .map-reset:focus-visible { outline: 2px solid #a29bff; outline-offset: 3px; }
+.map-catalog-status { position: absolute; top: 6px; left: 16px; color: #d9ae80; font-size: 11px; }
+.sky-map-red .star-label, .sky-map-red .constellation-label { stroke: #22151c; }
+@media (max-width: 600px) {
+  .sky-map-svg { width: 150%; max-width: none; margin-left: -25%; min-height: 320px; }
+  .map-orientation-note { left: 13px; font-size: 8px; bottom: 13px; }
+  .sky-map .map-reset { right: 11px; bottom: 8px; font-size: 9px; padding: 5px 7px; }
+}
