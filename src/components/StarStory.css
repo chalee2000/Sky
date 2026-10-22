@@ -2,6 +2,7 @@
 .story-entry:hover{background:#453252;border-color:#9372b1}.story-entry>svg:last-child{margin-left:auto}
 .star-story{padding-top:3px}.story-illustration{position:relative;display:grid;place-items:center;width:96px;height:96px;margin:10px auto 19px;border-radius:50%;background:radial-gradient(circle,#a088db28,transparent 70%)}
 .story-orbit{position:absolute;inset:5px;border:1px solid #8f6fc342;border-radius:50%;transform:rotate(-30deg) scaleY(.7)}.story-orbit:after{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:#c3a9e8;top:9px;left:9px}
+.story-photo-hero{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0 22px}.story-photo-hero .star-photo-button{width:180px;height:180px;border-radius:16px}.story-photo-hero .photo-open-icon{width:25px;height:25px;bottom:6px;right:6px}.story-photo-hero .photo-open-icon>svg{width:15px;height:15px}.story-photo-hero figcaption{font-size:10px;color:#a293b8;line-height:1.8;text-align:center}
 .story-star-name{text-align:center;color:#ddd5ed;font-size:13px}.story-star-name>span{font-family:Inter,sans-serif;color:#9288a8;font-size:11px}
 .story-kind{display:flex;align-items:center;justify-content:center;gap:6px;color:#ac99c7;font-size:10px;margin:13px 0 19px}
 .story-title{text-align:center;font-size:23px;line-height:1.6;font-weight:500;color:#eee2fb;margin:0 0 25px;outline:none}.story-title:focus-visible{outline:1px dotted #a797d2;outline-offset:6px;border-radius:5px}

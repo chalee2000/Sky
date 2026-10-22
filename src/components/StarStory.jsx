@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { stars, constellations } from '../lib/astronomy.js';
 import { starStories, traditionForStar } from '../lib/starStories.js';
+import { StarPhotoButton } from './StarPhoto.jsx';
 import './StarStory.css';
 
-export default function StarStory({ star, onChangeStar }) {
+export default function StarStory({ star, onChangeStar, onOpenPhoto }) {
   const heading = useRef(null);
   const story = starStories[star.id];
   const tradition = traditionForStar(star);
@@ -18,7 +19,7 @@ export default function StarStory({ star, onChangeStar }) {
     requestAnimationFrame(() => heading.current?.focus({ preventScroll: true }));
   };
   return <article className="star-story" data-story-id={star.id}>
-    <div className="story-illustration" aria-hidden="true"><span className="story-orbit"/><Sparkles size={36} style={{ color: star.color }}/></div>
+    <figure className="story-photo-hero"><StarPhotoButton key={star.id} star={star} onOpen={onOpenPhoto} showStatus/><figcaption>ภาพสำรวจท้องฟ้า DSS2 · แตะดูภาพขยาย</figcaption></figure>
     <div className="story-star-name">{star.name} <span>· {star.nameEn}</span></div>
     <span className="story-kind"><BookOpen size={12}/>{story.label}</span>
     <h3 ref={heading} tabIndex={-1} className="story-title">{story.title}</h3>

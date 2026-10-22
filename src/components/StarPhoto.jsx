@@ -13,13 +13,14 @@ function usePhotoStatus(url) {
   return {status,attempt,loaded:()=>setStatus('ready'),failed:()=>setStatus('error'),retry:()=>{setStatus('loading');setAttempt(value=>value+1);}};
 }
 
-export function StarPhotoButton({star,onOpen}) {
+export function StarPhotoButton({star,onOpen,showStatus=false}) {
   const photo=starImage(star);
   const {status,attempt,loaded,failed}=usePhotoStatus(photo.url);
   return <button className="star-photo-button" onClick={onOpen} aria-label={`ดูภาพถ่ายจริงบริเวณดาว${star.name}`} title={`ดูภาพถ่ายจริงบริเวณดาว${star.name}`} data-photo-star={star.id}>
     <img key={attempt} src={photo.url} alt="" referrerPolicy="no-referrer" loading="lazy" decoding="async" onLoad={loaded} onError={failed} className={status==='ready'?'ready':''}/>
     {status==='loading'&&<LoaderCircle size={19} className="photo-spinner" aria-hidden="true"/>}
     {status==='error'&&<Camera size={22} aria-hidden="true"/>}
+    {showStatus&&status!=='ready'&&<span className="star-photo-inline-status">{status==='loading'?'กำลังโหลดภาพถ่ายจริง…':'ยังโหลดภาพจริงไม่ได้ · แตะเพื่อลอง'}</span>}
     <span className="photo-open-icon"><ZoomIn size={11}/></span>
   </button>;
 }
