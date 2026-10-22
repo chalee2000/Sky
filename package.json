@@ -7,11 +7,12 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js",
+    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js",
     "test:e2e": "node scripts/smoke.mjs",
     "test:sensors": "node scripts/orientation-smoke.mjs",
     "test:fullscreen": "node scripts/fullscreen-smoke.mjs",
-    "test:stories": "node scripts/stories-smoke.mjs"
+    "test:stories": "node scripts/stories-smoke.mjs",
+    "test:images": "node scripts/images-smoke.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
