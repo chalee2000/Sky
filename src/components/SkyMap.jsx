@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { constellations, equatorialToHorizontal, stars } from '../lib/astronomy';
 import './SkyMap.css';
+import { PlanetMarker } from './Planets.jsx';
 
 const WIDTH = 900;
 const HEIGHT = 560;
@@ -35,6 +36,9 @@ export default function SkyMap({
   onZoomChange,
   nightMode = false,
   expanded = false,
+  planets = [],
+  selectedPlanetId,
+  onSelectPlanet,
 }) {
   const uid = useId().replaceAll(':', '');
   const [catalog, setCatalog] = useState([]);
@@ -96,7 +100,7 @@ export default function SkyMap({
   const accent = nightMode ? '#e88474' : '#aaa3ff';
 
   function startDrag(event) {
-    if (event.button !== 0 || event.target.closest('[data-star]')) return;
+    if (event.button !== 0 || event.target.closest('[data-star], [data-planet]')) return;
     dragRef.current = { x: event.clientX, rotation };
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
@@ -225,6 +229,11 @@ export default function SkyMap({
                 <circle cx={star.x} cy={star.y} r="10" fill="transparent" className="star-hit-area" />
               </g>
             );
+          })}
+          {planets.filter(planet=>planet.altitude>=0).map(planet=>{
+            const point=project(planet.altitude,planet.azimuth,rotation,safeZoom);
+            if(Math.hypot(point.x-CX,point.y-CY)>RADIUS-2)return null;
+            return <PlanetMarker key={planet.id} planet={planet} x={point.x} y={point.y} selected={selectedPlanetId===planet.id} onSelect={onSelectPlanet} showLabels={showLabels} nightMode={nightMode}/>;
           })}
         </g>
 

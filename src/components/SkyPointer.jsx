@@ -3,10 +3,11 @@ import { Compass, Crosshair } from 'lucide-react';
 import { stars, constellations, equatorialToHorizontal } from '../lib/astronomy.js';
 import { projectToView } from '../lib/orientation.js';
 import './SkyPointer.css';
+import { PlanetMarker } from './Planets.jsx';
 
 const direction = angle => ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(angle/45)%8];
 
-export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode }) {
+export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet }) {
   const container = useRef(null);
   const uid = useId().replaceAll(':', '');
   const [size, setSize] = useState({ width: 700, height: 480 });
@@ -56,6 +57,7 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
         {view && backgroundStars.map((star,i) => { const p=project(star.altitude,star.azimuth); return p?.visible && <circle key={i} cx={p.x} cy={p.y} r={Math.max(.55,2.1-star.magnitude*.24)} fill={nightMode?'#d5a292':star.color} opacity={Math.max(.25,.95-star.magnitude*.09)}/>; })}
         {view && showLines && <g className="pointer-constellation-lines" aria-hidden="true">{constellations.flatMap(c=>c.lines.map(([a,b],i)=>{const p=byId.get(a)?.point,q=byId.get(b)?.point;return p&&q&&Math.abs(p.x-q.x)<width*3&&Math.abs(p.y-q.y)<height*3&&<line key={`${c.id}-${i}`} x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke={accent} strokeWidth=".8" strokeOpacity=".45"/>;}))}</g>}
         {view && projected.filter(star=>star.point?.visible).map(star=><g key={star.id} role="button" tabIndex={0} className="pointer-star" aria-label={`${star.name} (${star.nameEn})`} aria-pressed={selectedStarId===star.id} onClick={()=>onSelectStar(star.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelectStar(star.id);}}}><title>{star.name} · {star.nameEn}</title>{selectedStarId===star.id&&<circle cx={star.point.x} cy={star.point.y} r="15" fill="none" stroke={accent} strokeWidth="1"/>}<circle cx={star.point.x} cy={star.point.y} r={Math.max(1.6,3.6-star.magnitude*.5)} fill={nightMode?'#f0baa7':star.color}/>{showLabels&&<text x={star.point.x+10} y={star.point.y-10} fill="#d7d8ec" className="pointer-star-label">{star.name}</text>}<circle cx={star.point.x} cy={star.point.y} r="13" fill="transparent" className="pointer-star-hit"/></g>)}
+        {view && planets.filter(planet=>planet.altitude>=0).map(planet=>{const p=project(planet.altitude,planet.azimuth);return p?.visible&&<PlanetMarker key={planet.id} planet={planet} x={p.x} y={p.y} selected={selectedPlanetId===planet.id} onSelect={onSelectPlanet} showLabels={showLabels} nightMode={nightMode} pointer/>;})}
         {view && [['N',0],['E',90],['S',180],['W',270]].map(([label,az])=>{const p=project(0,az);return p&&<text key={label} x={p.x} y={p.y-9} textAnchor="middle" fill="#c7c6df" fontSize="13">{label}</text>;})}
       </g>
       {view&&<g aria-hidden="true" stroke={accent} strokeWidth="1" opacity=".7"><path d={`M${width/2-14},${height/2}h9 M${width/2+5},${height/2}h9 M${width/2},${height/2-14}v9 M${width/2},${height/2+5}v9`}/><circle cx={width/2} cy={height/2} r="2" fill={accent} stroke="none"/></g>}
