@@ -9,6 +9,7 @@ const cities = [
   { name: 'เชียงใหม่', short: 'เชียงใหม่', latitude: 18.7883, longitude: 98.9853 },
   { name: 'ดอยอินทนนท์', short: 'ดอยอินทนนท์', latitude: 18.5883, longitude: 98.4867 },
   { name: 'ขอนแก่น', short: 'ขอนแก่น', latitude: 16.4322, longitude: 102.8236 },
+  { name: 'ชุมพร', short: 'ชุมพร', latitude: 10.4930, longitude: 99.1800 },
   { name: 'ภูเก็ต', short: 'ภูเก็ต', latitude: 7.8804, longitude: 98.3923 },
   { name: 'ลอนดอน', short: 'ลอนดอน', latitude: 51.5074, longitude: -0.1278 },
   { name: 'ซิดนีย์', short: 'ซิดนีย์', latitude: -33.8688, longitude: 151.2093 },
