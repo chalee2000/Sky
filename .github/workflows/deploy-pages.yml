@@ -32,7 +32,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Test astronomy calculations
+      - name: Test astronomy and orientation calculations
         run: npm test
 
       - name: Build website
