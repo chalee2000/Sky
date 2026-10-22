@@ -64,6 +64,7 @@ export default function useMapFullscreen(panelRef) {
     const closeButton = panel.querySelector('[data-fullscreen-toggle]');
     closeButton?.focus({ preventScroll: true });
     const keydown = event => {
+      if (event.defaultPrevented || document.querySelector('dialog[open]')) return;
       if (event.key === 'Escape') { event.preventDefault(); void exit(); }
       if (event.key !== 'Tab') return;
       const focusable = [...panel.querySelectorAll('button:not(:disabled), a[href], input:not(:disabled), [tabindex="0"]')].filter(element => element.getClientRects().length);

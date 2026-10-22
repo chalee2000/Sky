@@ -1,0 +1,58 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
+
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/';
+const errors=[];
+try {
+  await mkdir('test-results',{recursive:true});
+  const page=await browser.newPage({viewport:{width:390,height:844}});
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto(base,{waitUntil:'networkidle'});
+  const search=page.getByRole('textbox',{name:'ค้นหาดาวหรือกลุ่มดาว'});
+  await search.fill('Vega');
+  await page.locator('.search-results button').first().click();
+  await page.getByRole('button',{name:'อ่านนิทานของดาวดวงนี้',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'นิทานดวงดาว'});
+  await dialog.waitFor();
+  assert.equal(await dialog.locator('.star-story').getAttribute('data-story-id'),'vega');
+  assert.ok((await dialog.locator('.story-kind').innerText()).includes('แต่ง'));
+  assert.equal(await dialog.getByRole('heading',{name:'ช่างทอผ้าของราตรี'}).count(),1);
+  await dialog.locator('summary').click();
+  assert.ok((await dialog.locator('.story-tradition').innerText()).includes('ทานาบาตะ'));
+  assert.ok((await dialog.locator('.story-facts').innerText()).includes('25 ปีแสง'));
+  await page.screenshot({path:'test-results/story-mobile.png',fullPage:true});
+  await dialog.getByRole('button',{name:'อ่านนิทานดวงถัดไป'}).click();
+  assert.equal(await dialog.locator('.star-story').getAttribute('data-story-id'),'sheliak');
+  assert.equal(await dialog.locator('details[open]').count(),0,'a different star starts with its own closed tradition section');
+  assert.equal(await dialog.getByRole('heading',{name:'สายพิณที่ขอพัก'}).count(),1);
+  await page.getByRole('button',{name:'ปิดหน้าต่าง',exact:true}).click();
+  assert.equal(await page.locator('dialog[open]').count(),0);
+  await search.fill('Betelgeuse');
+  await page.locator('.search-results button').first().click();
+  await page.getByRole('button',{name:'อ่านนิทานของดาวดวงนี้',exact:true}).click();
+  await dialog.getByRole('button',{name:'อ่านนิทานดวงก่อนหน้า'}).click();
+  assert.equal(await dialog.locator('.star-story').getAttribute('data-story-id'),'achernar','previous wraps to last star');
+  await dialog.getByRole('button',{name:'อ่านนิทานดวงถัดไป'}).click();
+  assert.equal(await dialog.locator('.star-story').getAttribute('data-story-id'),'betelgeuse');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button',{name:'แสดงแผนที่เต็มหน้าจอ',exact:true}).click();
+  await page.getByRole('button',{name:'อ่านนิทานดาวที่เลือก',exact:true}).click();
+  await dialog.waitFor();
+  await page.getByRole('button',{name:'ปิดหน้าต่าง',exact:true}).click();
+  assert.equal(await page.locator('.map-panel.is-fullscreen').count(),1,'closing story preserves native fullscreen');
+  await page.getByRole('button',{name:'ออกจากโหมดเต็มจอ',exact:true}).click();
+
+  await page.evaluate(()=>Object.defineProperty(Element.prototype,'requestFullscreen',{configurable:true,value:undefined}));
+  await page.getByRole('button',{name:'แสดงแผนที่เต็มหน้าจอ',exact:true}).click();
+  await page.getByRole('button',{name:'อ่านนิทานดาวที่เลือก',exact:true}).click();
+  await dialog.waitFor();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('dialog[open]').count(),0);
+  assert.equal(await page.locator('.fullscreen-fallback').count(),1,'Escape closes story while preserving mobile fullscreen');
+  await page.getByRole('button',{name:'ออกจากโหมดเต็มจอ',exact:true}).click();
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert.deepEqual(errors,[]);
+  console.log('PASS: star-specific story, fiction label, traditional legend, separate facts, next/previous and wrap, mobile layout, native/fallback fullscreen reading, dialog close and Escape.');
+}finally{await browser.close();}
