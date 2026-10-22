@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
+import { starStories } from '../src/lib/starStories.js';
 
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
 const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/';
@@ -17,16 +18,17 @@ try {
   const dialog=page.getByRole('dialog',{name:'นิทานดวงดาว'});
   await dialog.waitFor();
   assert.equal(await dialog.locator('.star-story').getAttribute('data-story-id'),'vega');
-  assert.ok((await dialog.locator('.story-kind').innerText()).includes('แต่ง'));
-  assert.equal(await dialog.getByRole('heading',{name:'ช่างทอผ้าของราตรี'}).count(),1);
-  await dialog.locator('summary').click();
-  assert.ok((await dialog.locator('.story-tradition').innerText()).includes('ทานาบาตะ'));
+  assert.ok((await dialog.locator('.story-kind').innerText()).includes('เล่าใหม่'));
+  assert.equal(await dialog.getByRole('heading',{name:starStories.vega.title}).count(),1);
+  assert.equal(await dialog.locator('.story-tradition').count(),0,'foreign mythology is replaced by Thai tales');
+  assert.equal(await dialog.getByRole('link',{name:'อ่านความเป็นมาของเรื่อง ↗'}).getAttribute('href'),starStories.vega.source);
+  assert.match(await dialog.locator('.story-fiction-note').innerText(),/ไม่ได้หมายความว่าดาวดวงนี้อยู่ในนิทาน/);
   assert.ok((await dialog.locator('.story-facts').innerText()).includes('25 ปีแสง'));
   await page.screenshot({path:'test-results/story-mobile.png',fullPage:true});
   await dialog.getByRole('button',{name:'อ่านนิทานดวงถัดไป'}).click();
   assert.equal(await dialog.locator('.star-story').getAttribute('data-story-id'),'sheliak');
-  assert.equal(await dialog.locator('details[open]').count(),0,'a different star starts with its own closed tradition section');
-  assert.equal(await dialog.getByRole('heading',{name:'สายพิณที่ขอพัก'}).count(),1);
+  assert.equal(await dialog.locator('details[open]').count(),0,'Thai stories do not show the former foreign-legend section');
+  assert.equal(await dialog.getByRole('heading',{name:starStories.sheliak.title}).count(),1);
   await page.getByRole('button',{name:'ปิดหน้าต่าง',exact:true}).click();
   assert.equal(await page.locator('dialog[open]').count(),0);
   await search.fill('Betelgeuse');
@@ -54,5 +56,5 @@ try {
   await page.getByRole('button',{name:'ออกจากโหมดเต็มจอ',exact:true}).click();
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   assert.deepEqual(errors,[]);
-  console.log('PASS: star-specific story, fiction label, traditional legend, separate facts, next/previous and wrap, mobile layout, native/fallback fullscreen reading, dialog close and Escape.');
+  console.log('PASS: Thai retellings, culture labels and source links, separate star facts, next/previous and wrap, mobile layout, native/fallback fullscreen reading, dialog close and Escape.');
 }finally{await browser.close();}
