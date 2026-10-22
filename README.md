@@ -16,6 +16,15 @@ npm run dev
 
 Vite ตั้งค่า `base: '/Sky/'` สำหรับ GitHub Pages ของ repository นี้ เปิด dev server ที่เส้นทาง `/Sky/` ไฟล์ข้อมูลและลิงก์สัญญาอนุญาตใช้ `import.meta.env.BASE_URL` เพื่อโหลดจากเส้นทางเดียวกัน หากกำหนด `SKY_TEST_URL` ให้ระบุ URL เต็มที่ลงท้ายด้วย `/Sky/` เช่น `http://127.0.0.1:4173/Sky/`
 
+## เผยแพร่ผ่าน GitHub Pages
+
+1. ใน repository `chalee2000/Sky` ไปที่ **Settings → Pages → Build and deployment → Source** แล้วเลือก **GitHub Actions**
+2. Workflow `.github/workflows/deploy-pages.yml` จะติดตั้ง dependencies ตาม lockfile ทดสอบ build และ deploy `dist/` ทุกครั้งที่ push ขึ้น `main`
+3. เรียก deploy เองได้ที่ **Actions → Deploy Sky to GitHub Pages → Run workflow** โดยเลือก branch `main` หาก push แรกเกิดก่อนเปิด Pages ให้รัน workflow อีกครั้งหลังตั้งค่า
+4. เมื่อขั้นตอน deploy สำเร็จ เปิดแอพได้ที่ **https://chalee2000.github.io/Sky/**
+
+Workflow ใช้ Node.js 24 และ `GITHUB_TOKEN` ที่ GitHub จัดให้โดยอัตโนมัติ ไม่ต้องเพิ่ม secret เอง Repository ต้องเปิดใช้ GitHub Actions และรองรับ GitHub Pages ตามสิทธิ์บัญชี
+
 ## สิ่งที่ทำได้
 
 - แผนที่ดาวจริง 5,044 ดวง คำนวณจากวันเวลาและพิกัดผู้สังเกต
