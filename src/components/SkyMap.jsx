@@ -50,7 +50,7 @@ export default function SkyMap({
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/data/stars.json', { signal: controller.signal })
+    fetch(`${import.meta.env.BASE_URL}data/stars.json`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error('Catalog unavailable');
         return response.json();
