@@ -1,0 +1,76 @@
+{
+  "credit": "NASA / NASA-3D-Resources",
+  "licenseStatement": "The upstream README describes the assets as free and without copyright. Its meta.json labels the repository NASA Open Source Agreement Version 1.3. No per-texture copyright or observation metadata is supplied. Preserve both statements and link to NASA media usage guidance.",
+  "readme": "https://github.com/nasa/NASA-3D-Resources/blob/master/README.md",
+  "metadata": "https://github.com/nasa/NASA-3D-Resources/blob/master/meta.json",
+  "usageGuidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "retrieved": "2026-10-23",
+  "modified": false,
+  "textures": [
+    {
+      "id": "mars",
+      "file": "mars.jpg",
+      "width": 1440,
+      "height": 720,
+      "bytes": 972896,
+      "sha256": "12ec6bf02ebd42a246edc778cb2ce8c595b4d9f0892badf0bfff8abb2303c780",
+      "source": "https://github.com/nasa/NASA-3D-Resources/blob/master/Images%20and%20Textures/Mars/Mars.jpg",
+      "download": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/Images%20and%20Textures/Mars/Mars.jpg",
+      "kind": "surface-map",
+      "credit": "NASA / NASA-3D-Resources",
+      "notes": "Surface texture published by NASA for 3D visualization. It shows surface terrain/albedo, not a contemporary photograph of the disk. The archive provides no acquisition date or color calibration for this file."
+    },
+    {
+      "id": "jupiter",
+      "file": "jupiter.jpg",
+      "width": 720,
+      "height": 360,
+      "bytes": 225878,
+      "sha256": "ac2d387f8ea56a59f45dea37993c779a730f49d7d9fdbc8d36c307a351b1f1a1",
+      "source": "https://github.com/nasa/NASA-3D-Resources/blob/master/Images%20and%20Textures/Jupiter/Jupiter.jpg",
+      "download": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/Images%20and%20Textures/Jupiter/Jupiter.jpg",
+      "kind": "cloud-map",
+      "credit": "NASA / NASA-3D-Resources",
+      "notes": "Cloud-band texture published by NASA for 3D visualization, including a Great Red Spot feature. Cloud positions and appearance change over time. The archive provides no acquisition date or color calibration for this file."
+    },
+    {
+      "id": "saturn",
+      "file": "saturn.jpg",
+      "width": 720,
+      "height": 360,
+      "bytes": 275735,
+      "sha256": "d959a239e3d87630daf08e2a688dcbf315fe01b1fd474e55522770108f40aca7",
+      "source": "https://github.com/nasa/NASA-3D-Resources/blob/master/Images%20and%20Textures/Saturn/Saturn.jpg",
+      "download": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/Images%20and%20Textures/Saturn/Saturn.jpg",
+      "kind": "cloud-map",
+      "credit": "NASA / NASA-3D-Resources",
+      "notes": "Cloud-band texture published by NASA for 3D visualization. It does not contain a ring map. The archive provides no acquisition date or color calibration for this file."
+    },
+    {
+      "id": "neptune",
+      "file": "neptune.jpg",
+      "width": 720,
+      "height": 360,
+      "bytes": 210528,
+      "sha256": "e9bb2b7bcfb98d3f1adc6f2e20e833a00c11e9677238d8a00ae7431214ca70aa",
+      "source": "https://github.com/nasa/NASA-3D-Resources/blob/master/Images%20and%20Textures/Neptune/Neptune.jpg",
+      "download": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/Images%20and%20Textures/Neptune/Neptune.jpg",
+      "kind": "processed-cloud-visualization",
+      "credit": "NASA / NASA-3D-Resources",
+      "notes": "Strongly processed blue texture published by NASA for 3D visualization. The archive does not establish natural color, the observing mission/date, or measured detail at every longitude. Do not describe it as a calibrated true-color photograph."
+    },
+    {
+      "id": "venus",
+      "file": "venus.jpg",
+      "width": 1440,
+      "height": 720,
+      "bytes": 1166974,
+      "sha256": "e395bced59e95339efbdd002d4a0bbbf81fe323a6694f3a4039120560c80e789",
+      "source": "https://github.com/nasa/NASA-3D-Resources/blob/master/Images%20and%20Textures/Venus/Venus.jpg",
+      "download": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/Images%20and%20Textures/Venus/Venus.jpg",
+      "kind": "radar-surface-visualization",
+      "credit": "NASA / NASA-3D-Resources",
+      "notes": "Orange surface-relief visualization in the NASA archive, consistent with a processed radar surface map. It is not an optical photograph of Venus cloud tops: opaque clouds prevent seeing this surface directly in visible light. The archive provides no mission/date or calibration metadata, so do not attach a specific mission attribution."
+    }
+  ]
+}

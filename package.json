@@ -7,13 +7,14 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js && node src/lib/planets.test.js",
+    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js && node src/lib/planets.test.js && node src/lib/celestialModels.test.js",
     "test:e2e": "node scripts/smoke.mjs",
     "test:sensors": "node scripts/orientation-smoke.mjs",
     "test:fullscreen": "node scripts/fullscreen-smoke.mjs",
     "test:stories": "node scripts/stories-smoke.mjs",
     "test:images": "node scripts/images-smoke.mjs",
-    "test:planets": "node scripts/planets-smoke.mjs"
+    "test:planets": "node scripts/planets-smoke.mjs",
+    "test:models": "node scripts/models-smoke.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
@@ -21,7 +22,8 @@
     "astronomy-engine": "^2.1.19",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",

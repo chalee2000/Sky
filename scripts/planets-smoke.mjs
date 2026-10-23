@@ -17,8 +17,8 @@ try {
   await card.getByRole('button').click();
   const details=page.locator('[data-planet-details="saturn"]');
   await details.waitFor();
-  assert.match(await details.innerText(),/ภาพประกอบ · ไม่ใช่ภาพถ่าย/);
-  assert.equal(await details.locator('a').getAttribute('href'),'https://science.nasa.gov/saturn/');
+  assert.match(await details.innerText(),/แบบจำลอง 3 มิติ · ไม่ใช่ภาพถ่าย/);
+  assert.equal(await details.locator('a[href="https://science.nasa.gov/saturn/"]').getAttribute('href'),'https://science.nasa.gov/saturn/');
   assert.equal(await details.locator('img').count(),0,'moving planets do not reuse a fixed-star survey photo');
   await page.keyboard.press('Escape');
   const before=await card.locator('.star-stats strong').first().innerText();

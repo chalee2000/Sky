@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Camera, ExternalLink, ImageOff, LoaderCircle, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { Box, Camera, ExternalLink, ImageOff, LoaderCircle, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { starImage } from '../lib/starImages.js';
 import './StarPhoto.css';
 
@@ -25,7 +25,7 @@ export function StarPhotoButton({star,onOpen,showStatus=false}) {
   </button>;
 }
 
-export default function StarPhoto({star}) {
+export default function StarPhoto({star,onOpenModel}) {
   const photo=starImage(star);
   const {status,attempt,loaded,failed,retry}=usePhotoStatus(photo.url);
   const [zoom,setZoom]=useState(1);
@@ -39,6 +39,7 @@ export default function StarPhoto({star}) {
       {status==='error'&&<div className="photo-state photo-error" role="status"><ImageOff size={30}/><strong>ยังโหลดภาพถ่ายจริงไม่ได้</strong><span>ตรวจอินเทอร์เน็ต หรือลองใหม่ภายหลัง<br/>แอพจะไม่ใช้รูปดาวอื่นหรือภาพจำลองแทน</span><button onClick={retry}><RotateCcw size={14}/> ลองโหลดอีกครั้ง</button></div>}
     </div>
     <div className="photo-controls"><button aria-label="ย่อภาพดาว" disabled={status!=='ready'||zoom<=1} onClick={()=>setZoom(value=>Math.max(1,value-.5))}><ZoomOut size={17}/></button><span>{Math.round(zoom*100)}%</span><button aria-label="ขยายภาพดาว" disabled={status!=='ready'||zoom>=3} onClick={()=>setZoom(value=>Math.min(3,value+.5))}><ZoomIn size={17}/></button><button aria-label="คืนขนาดภาพดาว" disabled={zoom===1} onClick={()=>setZoom(1)}><RotateCcw size={15}/></button><a href={photo.url} target="_blank" rel="noreferrer">เปิดภาพต้นฉบับ <ExternalLink size={12}/></a></div>
+    {onOpenModel&&<button className="model-view-entry" onClick={onOpenModel}><Box size={15}/> สำรวจแบบจำลอง 3 มิติของดาวนี้</button>}
     <h3 className="photo-star-name">{star.name} <span>{star.nameEn}</span></h3>
     <p className="photo-explanation">กรอบภาพตรงกับพิกัดของดาว{star.name} และบริเวณโดยรอบ ดาวส่วนใหญ่อยู่ไกลจนภาพถ่ายเห็นเป็นจุดแสง ไม่ใช่ภาพรายละเอียดผิวดาว</p>
     <dl className="photo-coordinates"><div><dt>ไรต์แอสเซนชัน J2000</dt><dd>{photo.raDegrees.toFixed(4)}°</dd></div><div><dt>เดคลิเนชัน J2000</dt><dd>{photo.decDegrees.toFixed(4)}°</dd></div><div><dt>ขอบเขตภาพ</dt><dd>{(photo.fieldOfView*60).toFixed(0)} ลิปดา</dd></div></dl>
