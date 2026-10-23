@@ -1,0 +1,25 @@
+.constellation-myth{margin:20px 0;border:1px solid #514362;border-radius:12px;background:linear-gradient(140deg,#29213580,#151b2d70);scroll-margin-top:16px}
+.constellation-myth summary{display:flex;align-items:center;gap:11px;padding:17px 14px;color:#d0bbeb;font-size:14px;cursor:pointer;list-style:none;min-height:64px;border-radius:12px}
+.constellation-myth summary::-webkit-details-marker{display:none}
+.constellation-myth summary:focus-visible{outline:2px solid #c1a8ed;outline-offset:3px}
+.constellation-myth summary>svg{flex-shrink:0}
+.constellation-myth summary>span{min-width:0;flex:1}
+.constellation-myth summary small{display:block;margin-top:5px;color:#a59ab8;font-size:11px;line-height:1.8}
+.myth-chevron{transition:transform .15s}
+.constellation-myth[open] .myth-chevron{transform:rotate(180deg)}
+.constellation-myth-body{padding:0 17px 20px;overflow-wrap:anywhere}
+.myth-tradition{display:inline-block;color:#cebb9c;font-size:10px;line-height:1.8;border-top:1px solid #514362;width:100%;padding-top:15px}
+.constellation-myth-body h3{font-size:20px;line-height:1.7;font-weight:500;color:#eadcf8;margin:13px 0}
+.constellation-myth-body h3:focus{outline:none}
+.myth-context,.myth-variant{font-size:11px;line-height:1.95;color:#a69db5}
+.myth-paragraphs p{font-size:14px;line-height:2.1;color:#d0c4dc;margin:20px 0}
+.myth-sky-connection{border-left:2px solid #aa91c8;background:#171e2f90;padding:12px 14px;margin:20px 0}
+.myth-sky-connection strong{font-size:12px;font-weight:500;color:#bca8d6}
+.myth-sky-connection p{font-size:12px;line-height:2;color:#abb6cd;margin-top:8px}
+.myth-sources{display:grid;gap:7px;font-size:11px;line-height:1.8;margin-top:18px}
+.myth-sources>span,.myth-related>span{color:#8f88a2;font-size:10px}
+.myth-sources a{color:#baa5d5;text-decoration:underline;text-underline-offset:3px}
+.myth-related{display:grid;gap:8px;border-top:1px solid #383348;margin-top:20px;padding-top:16px}
+.myth-related button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:42px;padding:9px 11px;text-align:left;background:#30273f;border:1px solid #584666;border-radius:7px;color:#d0bde5;font-size:12px;line-height:1.8}
+.myth-related button:hover{background:#413151;border-color:#9577b1}
+@media(max-width:400px){.constellation-myth-body{padding-left:13px;padding-right:13px}.constellation-myth summary{padding:14px 12px;font-size:13px}.constellation-myth-body h3{font-size:18px}.myth-paragraphs p{font-size:13px}}

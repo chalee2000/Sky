@@ -46,8 +46,29 @@ try{
     assert.equal(await page.locator('[data-constellation-details]').getAttribute('data-constellation-details'),c.id);
     assert.ok(await page.locator('.constellation-member').count()>0);
     assert.ok(await page.locator('.constellation-source').getAttribute('href'));
+    await page.locator('.constellation-myth summary').click();
+    assert.equal(await page.locator('.constellation-myth').getAttribute('data-myth'),c.id);
+    assert.equal(await page.locator('.myth-paragraphs p').count(),2);
+    assert.ok(await page.locator('.myth-sources a').count()>0);
+    if(c.id==='crux'){
+      assert.equal(await page.locator('.constellation-myth').getAttribute('data-myth-kind'),'history');
+      assert.match(await page.locator('.constellation-myth summary').innerText(),/ประวัติ/);
+      assert.equal(await page.locator('.myth-context').count(),0);
+    }else{
+      assert.match(await page.locator('.myth-context').innerText(),/ตำนานฉบับย่อ/);
+    }
     await close();
   }
+  await open('Orion');
+  const mythSummary=page.locator('.constellation-myth summary');
+  await mythSummary.focus();
+  await page.keyboard.press('Enter');
+  await page.locator('.myth-related button').filter({hasText:'Scorpius'}).click();
+  assert.equal(await page.locator('[data-constellation-details]').getAttribute('data-constellation-details'),'scorpius');
+  assert.ok(await page.locator('.constellation-myth').evaluate(el=>el.open));
+  assert.ok(await page.locator('.constellation-myth-body h3').evaluate(el=>el===document.activeElement));
+  await page.getByRole('dialog').screenshot({path:'test-results/constellation-myth-mobile.png'});
+  await close();
   await page.getByRole('button',{name:'กลุ่มดาว',exact:true}).click();
   await page.getByRole('button',{name:'ทั้งหมด',exact:true}).click();
   await page.locator('.constellation-card').first().click();
@@ -57,6 +78,8 @@ try{
   await page.getByRole('button',{name:'แสดงแผนที่เต็มหน้าจอ',exact:true}).click();
   await page.getByRole('button',{name:'รายละเอียดกลุ่มดาวที่เลือก',exact:true}).click();
   await page.locator('[data-constellation-details]').waitFor();
+  await page.locator('.constellation-myth summary').click();
+  await page.locator('.myth-paragraphs').waitFor({state:'visible'});
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('.map-panel.is-fullscreen').count(),1);
   await page.getByRole('button',{name:'รายละเอียดกลุ่มดาวที่เลือก',exact:true}).click();
@@ -67,9 +90,11 @@ try{
   await page.getByRole('button',{name:'ออกจากโหมดเต็มจอ',exact:true}).click();
   await page.setViewportSize({width:320,height:700});
   await open('Pegasus');
+  await page.locator('.constellation-myth summary').click();
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert.ok(await page.getByRole('dialog').evaluate(el=>el.scrollWidth<=el.clientWidth));
   await close();
   await checkToolbar();
   assert.deepEqual(errors,[]);
-  console.log('PASS: all 22 profiles, search/library/map entries, accurate member/reference split, changing horizon status, selected star details, fullscreen return and centering, mobile layout.');
+  console.log('PASS: all 22 profiles and myths/history, keyboard reading, related-story navigation and focus, search/library/map entries, accurate member/reference split, changing horizon status, selected star details, fullscreen reading/return/centering, mobile layout.');
 }finally{await browser.close();}
