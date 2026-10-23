@@ -1,0 +1,75 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
+import { constellations } from '../src/lib/astronomy.js';
+
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+const page=await browser.newPage({viewport:{width:390,height:844}});
+const errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+await page.route('https://alasky.cds.unistra.fr/**',route=>route.abort());
+const open=async name=>{
+  await page.getByRole('textbox',{name:'ค้นหาดาวหรือกลุ่มดาว'}).fill(name);
+  await page.locator('.search-results button').filter({has:page.getByText('กลุ่มดาว',{exact:true})}).first().click();
+  await page.locator('[data-constellation-details]').waitFor();
+};
+const close=()=>page.getByRole('button',{name:'ปิดหน้าต่าง',exact:true}).click();
+const checkToolbar=async()=>assert.ok(await page.evaluate(()=>document.querySelector('.map-tools').getBoundingClientRect().bottom+8<=document.querySelector('.map-bottom').getBoundingClientRect().top),'map tools leave room for the night-mode control');
+try{
+  await mkdir('test-results',{recursive:true});
+  await page.goto(process.env.SKY_TEST_URL||'http://127.0.0.1:5180/Sky/',{waitUntil:'networkidle'});
+  await checkToolbar();
+  await page.locator('.date-control').click();
+  await page.getByLabel('วันและเวลา',{exact:true}).fill('2026-12-15T22:00');
+  await page.getByRole('button',{name:'แสดงท้องฟ้า',exact:true}).click();
+  await open('Orion');
+  assert.equal(await page.locator('[data-constellation-details]').getAttribute('data-constellation-details'),'orion');
+  assert.equal(await page.locator('[data-member-star]').count(),8);
+  assert.equal(await page.locator('[data-visible-count]').getAttribute('data-visible-count'),'8');
+  assert.match(await page.locator('.constellation-scope').innerText(),/ไม่มีระยะทางเดียว/);
+  await page.getByRole('dialog').screenshot({path:'test-results/constellation-details-mobile.png'});
+  await close();
+  await page.getByRole('slider').fill('600');
+  await open('Orion');
+  assert.equal(await page.locator('[data-visible-count]').getAttribute('data-visible-count'),'0');
+  await close();
+  await open('Pegasus');
+  assert.equal(await page.locator('[data-member-star][data-reference="false"]').count(),3);
+  assert.equal(await page.locator('[data-member-star="alpheratz"]').getAttribute('data-reference'),'true');
+  await page.locator('[data-member-star="alpheratz"]').click();
+  await page.locator('[data-model-object="alpheratz"]').waitFor();
+  await page.locator('.constellation-group-link').click();
+  assert.equal(await page.locator('[data-constellation-details]').getAttribute('data-constellation-details'),'andromeda');
+  await close();
+  for(const c of constellations){
+    await open(c.nameEn);
+    assert.equal(await page.locator('[data-constellation-details]').getAttribute('data-constellation-details'),c.id);
+    assert.ok(await page.locator('.constellation-member').count()>0);
+    assert.ok(await page.locator('.constellation-source').getAttribute('href'));
+    await close();
+  }
+  await page.getByRole('button',{name:'กลุ่มดาว',exact:true}).click();
+  await page.getByRole('button',{name:'ทั้งหมด',exact:true}).click();
+  await page.locator('.constellation-card').first().click();
+  await page.locator('[data-constellation-details]').waitFor();
+  await page.getByRole('button',{name:'ดูกลุ่มดาวนี้บนแผนที่',exact:true}).click();
+  await page.locator('.sky-map').waitFor();
+  await page.getByRole('button',{name:'แสดงแผนที่เต็มหน้าจอ',exact:true}).click();
+  await page.getByRole('button',{name:'รายละเอียดกลุ่มดาวที่เลือก',exact:true}).click();
+  await page.locator('[data-constellation-details]').waitFor();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.map-panel.is-fullscreen').count(),1);
+  await page.getByRole('button',{name:'รายละเอียดกลุ่มดาวที่เลือก',exact:true}).click();
+  await page.getByRole('button',{name:'ดูกลุ่มดาวนี้บนแผนที่',exact:true}).click();
+  assert.equal(await page.locator('.map-panel.is-fullscreen').count(),1);
+  await page.locator('.sky-pointer[data-manual="true"]').waitFor();
+  assert.ok(await page.locator('.pointer-star[aria-pressed="true"]').count()>0,'show on map centers the selected visible member in fullscreen');
+  await page.getByRole('button',{name:'ออกจากโหมดเต็มจอ',exact:true}).click();
+  await page.setViewportSize({width:320,height:700});
+  await open('Pegasus');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await close();
+  await checkToolbar();
+  assert.deepEqual(errors,[]);
+  console.log('PASS: all 22 profiles, search/library/map entries, accurate member/reference split, changing horizon status, selected star details, fullscreen return and centering, mobile layout.');
+}finally{await browser.close();}

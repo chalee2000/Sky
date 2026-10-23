@@ -55,6 +55,8 @@ try {
   await page.getByRole('button', { name: 'ทั้งหมด', exact: true }).click();
   assert.equal(await page.locator('.constellation-card').count(), 22);
   await page.locator('.constellation-card').first().click();
+  await page.locator('[data-constellation-details]').waitFor();
+  await page.getByRole('button',{name:'ดูกลุ่มดาวนี้บนแผนที่',exact:true}).click();
   await page.locator('.sky-map').waitFor();
   await page.getByRole('button', { name: 'วิธีใช้แอพ', exact: true }).click();
   await page.getByRole('dialog', { name: 'เริ่มสำรวจท้องฟ้า' }).waitFor();

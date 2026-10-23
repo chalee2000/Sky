@@ -7,6 +7,8 @@
 @media(max-width:380px){.header-inner{padding:0 15px}.search-wrap input{width:128px}main{padding-left:15px;padding-right:15px}.context-controls{gap:6px}.context-button{font-size:9px;padding:9px 7px}.context-button>svg{width:12px}.date-control{padding:6px 7px}.sidebar{gap:10px;grid-template-columns:1fr 1.3fr}.moon-card{padding:14px 10px}.star-card{padding-left:11px;padding-right:11px}.star-more{width:calc(100% + 22px);margin:0 -11px;padding-left:11px;padding-right:11px}.star-identity h2{font-size:18px}.moon-content h3{font-size:12px}.phase-badge{font-size:7px}.map-bottom{font-size:7px}.map-bottom button{font-size:7px}.map-bottom>span>svg{display:none}.title-spark{margin-left:6px}h1{font-size:27px}.moon-art{width:88px;height:88px}.card-eyebrow{font-size:8px}}
 .sky-viewport .sky-map .map-reset{right:auto;left:22px;bottom:56px;min-height:28px;font-size:9px}
 .sky-viewport .sky-map .map-orientation-note{display:none}
+.map-tools button{flex-shrink:0}
+@media(max-width:740px){.map-panel:not(.is-fullscreen) .map-tools{top:76px;gap:1px}}
 .map-bottom{z-index:3}
 .daylight-notice{position:absolute;z-index:2;top:54px;left:23px;display:flex;align-items:center;gap:6px;font-size:9px;color:#d2ba92;max-width:calc(100% - 90px);padding:5px 8px;border:1px solid #d0a96725;border-radius:5px;background:#181824d9}
 .sky-viewport .sky-map-svg{min-height:385px;max-height:480px}

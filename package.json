@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js && node src/lib/planets.test.js && node src/lib/celestialModels.test.js",
+    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js && node src/lib/planets.test.js && node src/lib/celestialModels.test.js && node src/lib/constellationDetails.test.js",
     "test:e2e": "node scripts/smoke.mjs",
     "test:sensors": "node scripts/orientation-smoke.mjs",
     "test:fullscreen": "node scripts/fullscreen-smoke.mjs",
@@ -15,7 +15,8 @@
     "test:images": "node scripts/images-smoke.mjs",
     "test:planets": "node scripts/planets-smoke.mjs",
     "test:models": "node scripts/models-smoke.mjs",
-    "test:immersive": "node scripts/immersive-smoke.mjs"
+    "test:immersive": "node scripts/immersive-smoke.mjs",
+    "test:constellations": "node scripts/constellations-smoke.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

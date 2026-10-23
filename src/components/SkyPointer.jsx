@@ -13,11 +13,12 @@ function manualView(heading,altitude){
 }
 const direction = angle => ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(angle/45)%8];
 
-export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange }) {
+export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,focusTarget }) {
   const container = useRef(null);
   const pointers=useRef(new Map());
   const pinch=useRef(null);
   const [manualAngles,setManualAngles]=useState({heading:0,altitude:45});
+  useEffect(()=>{if(focusTarget)setManualAngles({heading:wrapHeading(focusTarget.heading),altitude:clampAltitude(focusTarget.altitude)});},[focusTarget]);
   useEffect(()=>{pointers.current.clear();pinch.current=null;},[manual]);
   const uid = useId().replaceAll(':', '');
   const [size, setSize] = useState({ width: 700, height: 480 });
