@@ -1,14 +1,24 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Compass, Crosshair } from 'lucide-react';
+import { Compass, Crosshair, RotateCcw } from 'lucide-react';
 import { stars, constellations, equatorialToHorizontal } from '../lib/astronomy.js';
 import { projectToView } from '../lib/orientation.js';
 import './SkyPointer.css';
 import { PlanetMarker } from './Planets.jsx';
 
+const clampAltitude=value=>Math.max(-10,Math.min(89,value));
+const wrapHeading=value=>((value%360)+360)%360;
+function manualView(heading,altitude){
+  const az=heading*Math.PI/180,alt=altitude*Math.PI/180;
+  return {heading,altitude,source:'manual',forward:[Math.cos(alt)*Math.sin(az),Math.cos(alt)*Math.cos(az),Math.sin(alt)],right:[Math.cos(az),-Math.sin(az),0],up:[-Math.sin(alt)*Math.sin(az),-Math.sin(alt)*Math.cos(az),Math.cos(alt)]};
+}
 const direction = angle => ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(angle/45)%8];
 
-export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet }) {
+export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange }) {
   const container = useRef(null);
+  const pointers=useRef(new Map());
+  const pinch=useRef(null);
+  const [manualAngles,setManualAngles]=useState({heading:0,altitude:45});
+  useEffect(()=>{pointers.current.clear();pinch.current=null;},[manual]);
   const uid = useId().replaceAll(':', '');
   const [size, setSize] = useState({ width: 700, height: 480 });
   const [catalog, setCatalog] = useState([]);
@@ -33,8 +43,41 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
   const namedStars = useMemo(() => stars.map(star => ({ ...star, ...equatorialToHorizontal(star.ra, star.dec, new Date(timestamp), location.latitude, location.longitude) })), [timestamp, location.latitude, location.longitude]);
   const backgroundStars = useMemo(() => catalog.map(([ra, dec, magnitude, bv]) => ({ magnitude, color: Number(bv)>1?'#ffc897':'#d6e4ff', ...equatorialToHorizontal(ra, dec, new Date(timestamp), location.latitude, location.longitude) })).filter(star => star.altitude >= 0), [catalog, timestamp, location.latitude, location.longitude]);
   const { width, height } = size;
-  const view = sensor.view;
-  const project = (altitude, azimuth) => projectToView(altitude, azimuth, view, width, height);
+  const view = manual ? manualView(manualAngles.heading,manualAngles.altitude) : sensor.view;
+  const scale=Math.max(1,Math.min(2.4,zoom));
+  const fieldOfView=62/scale;
+  const project = (altitude, azimuth) => projectToView(altitude, azimuth, view, width, height,fieldOfView);
+  const turn=(heading,altitude)=>setManualAngles(previous=>({heading:wrapHeading(previous.heading+heading),altitude:clampAltitude(previous.altitude+altitude)}));
+  const pointerDown=event=>{
+    if(!manual||event.button!==0||event.target.closest('button,[role="button"]'))return;
+    event.preventDefault();
+    pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if(pointers.current.size===2){const [a,b]=[...pointers.current.values()];pinch.current={distance:Math.hypot(a.x-b.x,a.y-b.y),zoom:scale};}
+  };
+  const pointerMove=event=>{
+    const previous=pointers.current.get(event.pointerId);
+    if(!manual||!previous)return;
+    event.preventDefault();
+    pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
+    if(pointers.current.size===2&&pinch.current&&onZoomChange){
+      const [a,b]=[...pointers.current.values()];
+      if(pinch.current.distance>0)onZoomChange(Math.max(1,Math.min(2.4,pinch.current.zoom*Math.hypot(a.x-b.x,a.y-b.y)/pinch.current.distance)));
+    }else if(pointers.current.size===1){
+      const degreesPerPixel=fieldOfView/Math.max(height,1);
+      turn(-(event.clientX-previous.x)*degreesPerPixel,(event.clientY-previous.y)*degreesPerPixel);
+    }
+  };
+  const pointerUp=event=>{
+    pointers.current.delete(event.pointerId);pinch.current=null;
+    if(event.currentTarget.hasPointerCapture?.(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const keyDown=event=>{
+    if(!manual||event.target!==event.currentTarget)return;
+    const shifts={ArrowLeft:[-5,0],ArrowRight:[5,0],ArrowUp:[0,5],ArrowDown:[0,-5]};
+    if(shifts[event.key]){event.preventDefault();turn(...shifts[event.key]);}
+    if(['+','=','-'].includes(event.key)&&onZoomChange){event.preventDefault();onZoomChange(Math.max(1,Math.min(2.4,scale+(event.key==='-'?-.2:.2))));}
+  };
   const projected = namedStars.map(star => ({ ...star, point: star.altitude>=0 ? project(star.altitude,star.azimuth) : null }));
   const byId = new Map(projected.map(star => [star.id, star]));
   const accent = nightMode ? '#e4a091' : '#b5a7ff';
@@ -48,8 +91,8 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
     }
     return path;
   }
-  return <div ref={container} className="sky-pointer" data-heading={view?.heading.toFixed(1)} data-altitude={view?.altitude.toFixed(1)}>
-    <svg className="sky-pointer-svg" viewBox={`0 0 ${width} ${height}`} role="group" aria-label="แผนที่ดาวตามทิศที่กล้องหลังมือถือชี้">
+  return <div ref={container} className={`sky-pointer ${manual?'sky-pointer-manual':''}`} data-manual={manual} data-heading={view?.heading.toFixed(1)} data-altitude={view?.altitude.toFixed(1)} data-fov={fieldOfView.toFixed(1)} tabIndex={manual?0:undefined} role={manual?'group':undefined} aria-label={manual?'ท้องฟ้าเต็มพื้นที่ ลากหรือใช้ปุ่มลูกศรเพื่อเปลี่ยนทิศ':undefined} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onKeyDown={keyDown}>
+    <svg className="sky-pointer-svg" viewBox={`0 0 ${width} ${height}`} role="group" aria-label={manual?'แผนที่ท้องฟ้ารอบตัวตามตำแหน่งผู้สังเกต':'แผนที่ดาวตามทิศที่กล้องหลังมือถือชี้'}>
       <defs><radialGradient id={`${uid}-sky`}><stop stopColor={nightMode?'#2c171f':'#1b2441'}/><stop offset="1" stopColor="#0b101c"/></radialGradient><clipPath id={`${uid}-clip`}><rect width={width} height={height}/></clipPath></defs>
       <rect width={width} height={height} fill={`url(#${uid}-sky)`}/>
       <g clipPath={`url(#${uid}-clip)`}>
@@ -63,7 +106,8 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
       {view&&<g aria-hidden="true" stroke={accent} strokeWidth="1" opacity=".7"><path d={`M${width/2-14},${height/2}h9 M${width/2+5},${height/2}h9 M${width/2},${height/2-14}v9 M${width/2},${height/2+5}v9`}/><circle cx={width/2} cy={height/2} r="2" fill={accent} stroke="none"/></g>}
     </svg>
     {!view && <div className="pointer-waiting" role="status"><Compass size={35}/><strong>{sensor.status==='requesting'?'รออนุญาตเซ็นเซอร์':'กำลังรอทิศทางจากมือถือ…'}</strong><span>ยกมือถือให้กล้องหลังชี้ไปยังท้องฟ้า<br/>แล้วค่อย ๆ หมุนตัวเพื่อสำรวจ</span></div>}
-    {view && <><div className="pointer-readout"><Compass size={14}/><strong>{direction(view.heading)} {Math.round(view.heading)}°</strong><span>เงย {view.altitude.toFixed(0)}°</span></div><div className="pointer-guidance">{view.altitude<0?<><Crosshair size={14}/> ลองยกกล้องหลังขึ้นเหนือขอบฟ้า</>:<>แผนที่ตามทิศมือถือ · ไม่ใช้กล้อง</>}</div></>}
+    {view && <><div className="pointer-readout"><Compass size={14}/><strong>{direction(view.heading)} {Math.round(view.heading)}°</strong><span>เงย {view.altitude.toFixed(0)}°</span></div><div className="pointer-guidance">{manual?<>{sensor.enabled?'รอทิศมือถือ · ลากดูได้ระหว่างรอ':`${view.altitude<0?'กำลังมองต่ำกว่าขอบฟ้า · ':''}ลากเพื่อหมุนมุมมอง · กางสองนิ้วเพื่อซูม`}</>:view.altitude<0?<><Crosshair size={14}/> ลองยกกล้องหลังขึ้นเหนือขอบฟ้า</>:<>แผนที่ตามทิศมือถือ · ไม่ใช้กล้อง</>}</div></>}
+    {manual&&<button className="pointer-reset" aria-label="คืนมุมมองท้องฟ้าเต็มจอ" onClick={()=>{setManualAngles({heading:0,altitude:45});onZoomChange?.(1);}}><RotateCcw size={13}/><span>N ↑ คืนมุมมอง</span></button>}
     {catalogError && <p className="pointer-catalog-error" role="status">โหลดข้อมูลดาวพื้นหลังไม่ได้ · แสดงเฉพาะดาวเด่น</p>}
   </div>;
 }

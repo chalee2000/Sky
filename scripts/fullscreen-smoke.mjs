@@ -64,7 +64,7 @@ try {
     assert.equal(await page.locator('.site-header').evaluate(el=>el.inert),true,'background navigation is inert');
     assert.equal(await page.getByRole('button',{name:'ออกจากโหมดเต็มจอ',exact:true}).evaluate(el=>el===document.activeElement),true,'focus moves to exit control');
     await page.getByRole('button',{name:'แสดงเส้นกลุ่มดาว',exact:true}).click();
-    assert.equal(await page.locator('.constellation-lines').count(),0,'map controls work while expanded');
+    assert.equal(await page.locator('.pointer-constellation-lines').count(),0,'map controls work while expanded');
     await page.screenshot({path:`test-results/fullscreen-${mode}.png`});
     await page.keyboard.press('Escape');
     await page.waitForFunction(()=>!document.querySelector('.map-panel.is-fullscreen'));

@@ -14,7 +14,8 @@
     "test:stories": "node scripts/stories-smoke.mjs",
     "test:images": "node scripts/images-smoke.mjs",
     "test:planets": "node scripts/planets-smoke.mjs",
-    "test:models": "node scripts/models-smoke.mjs"
+    "test:models": "node scripts/models-smoke.mjs",
+    "test:immersive": "node scripts/immersive-smoke.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
