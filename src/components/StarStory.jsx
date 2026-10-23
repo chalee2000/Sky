@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { stars, constellations } from '../lib/astronomy.js';
-import { starStories, thaiTales } from '../lib/starStories.js';
+import { starStories } from '../lib/starStories.js';
 import { StarPhotoButton } from './StarPhoto.jsx';
 import './StarStory.css';
 
@@ -23,9 +23,9 @@ export default function StarStory({ star, onChangeStar, onOpenPhoto }) {
     <span className="story-kind"><BookOpen size={12}/>{story.label}</span>
     <h3 ref={heading} tabIndex={-1} className="story-title">{story.title}</h3>
     <div className="story-prose">{story.paragraphs.map((paragraph,i)=><p key={i}>{paragraph}</p>)}</div>
-    <p className="story-fiction-note">เล่าใหม่แบบสั้นสำหรับอ่านใต้แสงดาว · นิทานมีหลายสำนวน การเลือกเรื่องให้อ่านคู่ดาวนี้ไม่ได้หมายความว่าดาวดวงนี้อยู่ในนิทาน</p>
-    <a className="text-button" href={story.source} target="_blank" rel="noreferrer">อ่านความเป็นมาของเรื่อง ↗</a>
-    <aside className="story-facts"><span><Sparkles size={14}/> ดาวจริงบนท้องฟ้า</span><p>{star.name} อยู่ในกลุ่มดาว{constellation?.name || star.constellationId} ห่างจากโลกประมาณ {Number(star.distance).toLocaleString('th-TH')} ปีแสง</p><small>ระยะทางเป็นค่าประมาณ แยกจากเหตุการณ์ในนิทาน</small></aside>
-    <nav className="story-navigation" aria-label="เลือกนิทานดวงดาว"><button onClick={()=>change(-1)} aria-label="อ่านนิทานดวงก่อนหน้า"><ChevronLeft size={16}/><span>เรื่องก่อนหน้า</span></button><span>ดาว {index+1} / {stars.length} · {thaiTales.length} นิทานไทย</span><button onClick={()=>change(1)} aria-label="อ่านนิทานดวงถัดไป"><span>เรื่องถัดไป</span><ChevronRight size={16}/></button></nav>
+    <p className="story-fiction-note">ตัวละครและบทสนทนาเป็นเรื่องแต่งเพื่อการเรียนรู้ ไม่ใช่ตำนานพื้นบ้านไทย · ชื่อดาว กลุ่มดาว และระยะทางอิงข้อมูลดาวที่เลือกในแอพ</p>
+    <a className="text-button" href={story.source} target="_blank" rel="noreferrer">ค้นข้อมูลดาวนี้ใน SIMBAD ↗</a>
+    <aside className="story-facts"><span><Sparkles size={14}/> ดาวจริงบนท้องฟ้า</span><p>{star.name} อยู่ในกลุ่มดาว{constellation?.name || star.constellationId} ห่างจากโลกประมาณ {Number(star.distance).toLocaleString('th-TH')} ปีแสง</p><small>ระยะทางเป็นค่าประมาณจากแค็ตตาล็อกในแอพ อาจต่างจากงานวิจัยใหม่ · ปีแสงเป็นหน่วยระยะทาง</small></aside>
+    <nav className="story-navigation" aria-label="เลือกนิทานดวงดาว"><button onClick={()=>change(-1)} aria-label="อ่านนิทานดวงก่อนหน้า"><ChevronLeft size={16}/><span>เรื่องก่อนหน้า</span></button><span>{index+1} / {stars.length}</span><button onClick={()=>change(1)} aria-label="อ่านนิทานดวงถัดไป"><span>เรื่องถัดไป</span><ChevronRight size={16}/></button></nav>
   </article>;
 }
