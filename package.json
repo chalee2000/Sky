@@ -18,7 +18,8 @@
     "test:immersive": "node scripts/immersive-smoke.mjs",
     "test:constellations": "node scripts/constellations-smoke.mjs",
     "test:gestures": "node scripts/map-gestures-smoke.mjs && node scripts/pointer-gestures-smoke.mjs",
-    "test:layout": "node scripts/ui-layout-smoke.mjs"
+    "test:layout": "node scripts/ui-layout-smoke.mjs",
+    "test:wheel": "node scripts/wheel-zoom-smoke.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { clampMapPan, clampMapZoom, zoomMapAtPoint } from '../lib/mapGestures.js';
+import useWheelZoom from './useWheelZoom.js';
 
 export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, center, radius }) {
   const [transform, setTransform] = useState({ pan:{x:0,y:0}, rotation:0 });
@@ -97,6 +98,10 @@ export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectSta
     const next = clampMapZoom(nextZoom);
     commit({ ...current, zoom:next, pan:zoomMapAtPoint(current.pan,current.zoom,next,anchor,center) });
   };
+  useWheelZoom(svgRef, (factor, event) => {
+    zoomAt(view.current.zoom * factor, point(event));
+    rebase();
+  });
   const reset = () => {
     pointers.current.clear(); baseline.current = null; moved.current = false;
     setDragging(false);
