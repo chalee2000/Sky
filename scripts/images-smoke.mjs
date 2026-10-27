@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 // A tiny image is a UI test fixture only. It is never shipped as a star photo.
 const fixture=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1sAAAAASUVORK5CYII=','base64');
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
-const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/';
+const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/?view=map';
 const errors=[];
 async function createPage(fail=false){
   const page=await browser.newPage({viewport:{width:390,height:844}});

@@ -1,0 +1,11 @@
+.pointer-constellation-layer{pointer-events:none}
+.pointer-constellation-layer .pointer-constellation-lines line{stroke:#5b9fc7;stroke-width:.85;stroke-opacity:.58;vector-effect:non-scaling-stroke}
+.pointer-constellation-layer .pointer-constellation-lines .is-selected line{stroke:#6cdbff;stroke-width:1.15;stroke-opacity:.88}
+.pointer-constellation-name text{font-family:'Noto Sans Thai',sans-serif;font-weight:500;fill:#88b5db;paint-order:stroke;stroke:#080e1c;stroke-width:3px;stroke-linejoin:round}
+.pointer-constellation-name .pointer-constellation-english{font-family:Inter,sans-serif;font-weight:400;fill:#6e88a7;stroke-width:2.5px}
+.pointer-constellation-name.is-selected text{fill:#9bdcff}
+.pointer-constellation-name.is-selected .pointer-constellation-english{fill:#9ab7d0}
+.pointer-constellation-night .pointer-constellation-lines line{stroke:#b37a6a}
+.pointer-constellation-night .pointer-constellation-lines .is-selected line{stroke:#e0a28d}
+.pointer-constellation-night .pointer-constellation-name text{fill:#cfaa9b;stroke:#1b1016}
+.pointer-constellation-night .pointer-constellation-name .pointer-constellation-english{fill:#ac857c}

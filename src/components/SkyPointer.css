@@ -1,5 +1,5 @@
 .sky-pointer{position:relative;width:100%;height:480px;overflow:hidden;touch-action:pan-y;background:#0b101c}
-.sky-pointer-svg{display:block;width:100%;height:100%}
+.sky-pointer-svg{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none}
 .pointer-star{cursor:pointer;outline:none}
 .pointer-star:focus-visible .pointer-star-hit{fill:#b5a7ff22;stroke:#c6bcff;stroke-width:1.3}
 .pointer-star-label{font-family:'Noto Sans Thai',sans-serif;font-size:11px;paint-order:stroke;stroke:#11182c;stroke-width:3px;stroke-linejoin:round;pointer-events:none}

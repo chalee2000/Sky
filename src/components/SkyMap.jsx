@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { constellations, equatorialToHorizontal, stars } from '../lib/astronomy';
 import './SkyMap.css';
 import { PlanetMarker } from './Planets.jsx';
+import useMapGestures from '../hooks/useMapGestures.js';
 
 const WIDTH = 900;
 const HEIGHT = 560;
@@ -10,10 +11,10 @@ const CY = HEIGHT / 2;
 const RADIUS = 247;
 const RAD = Math.PI / 180;
 
-function project(altitude, azimuth, rotation, zoom) {
+function project(altitude, azimuth, rotation, zoom, pan = {x:0,y:0}) {
   const radius = ((90 - altitude) / 90) * RADIUS * zoom;
   const angle = (azimuth + rotation) * RAD;
-  return { x: CX - radius * Math.sin(angle), y: CY - radius * Math.cos(angle) };
+  return { x: CX + pan.x - radius * Math.sin(angle), y: CY + pan.y - radius * Math.cos(angle) };
 }
 
 function colorForIndex(value) {
@@ -35,7 +36,6 @@ export default function SkyMap({
   zoom = 1,
   onZoomChange,
   nightMode = false,
-  expanded = false,
   planets = [],
   selectedPlanetId,
   onSelectPlanet,
@@ -43,15 +43,14 @@ export default function SkyMap({
   const uid = useId().replaceAll(':', '');
   const [catalog, setCatalog] = useState([]);
   const [catalogError, setCatalogError] = useState(false);
-  const [rotation, setRotation] = useState(0);
-  const [dragging, setDragging] = useState(false);
   const [hoveredStar, setHoveredStar] = useState(null);
-  const dragRef = useRef(null);
   const svgRef = useRef(null);
   const latitude = location?.latitude ?? 13.7563;
   const longitude = location?.longitude ?? 100.5018;
   const timestamp = date instanceof Date ? date.getTime() : new Date(date).getTime();
-  const safeZoom = Math.max(1, Math.min(2.4, zoom));
+  const { rotation, pan, dragging, safeZoom, reset:resetView, handlers } = useMapGestures({
+    svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, center:{x:CX,y:CY}, radius:RADIUS,
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,49 +91,23 @@ export default function SkyMap({
 
   const projectedStars = useMemo(() => horizontalStars.map((star) => ({
     ...star,
-    ...project(star.altitude, star.azimuth, rotation, safeZoom),
-  })), [horizontalStars, rotation, safeZoom]);
+    ...project(star.altitude, star.azimuth, rotation, safeZoom, pan),
+  })), [horizontalStars, rotation, safeZoom, pan]);
   const byId = useMemo(() => new Map(projectedStars.map((star) => [star.id, star])), [projectedStars]);
   const visibleStars = projectedStars.filter((star) => star.altitude >= 0 && Math.hypot(star.x - CX, star.y - CY) < RADIUS - 2);
   const selectedStar = byId.get(selectedStarId);
   const accent = nightMode ? '#e88474' : '#aaa3ff';
 
-  function startDrag(event) {
-    if (event.button !== 0 || event.target.closest('[data-star], [data-planet]')) return;
-    dragRef.current = { x: event.clientX, rotation };
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDragging(true);
-  }
-
-  function moveDrag(event) {
-    if (!dragRef.current) return;
-    const width = svgRef.current?.getBoundingClientRect().width || WIDTH;
-    setRotation((dragRef.current.rotation + ((event.clientX - dragRef.current.x) / width) * 180) % 360);
-  }
-
-  function endDrag() {
-    dragRef.current = null;
-    setDragging(false);
-  }
-
-  function resetView() {
-    setRotation(0);
-    onZoomChange?.(1);
-  }
-
   return (
-    <div className={`sky-map ${dragging ? 'is-dragging' : ''} ${nightMode ? 'sky-map-red' : ''}`}>
+    <div data-zoom={safeZoom} data-pan-x={pan.x} data-pan-y={pan.y} data-rotation={rotation} className={`sky-map ${dragging ? 'is-dragging' : ''} ${nightMode ? 'sky-map-red' : ''}`}>
       <svg
         ref={svgRef}
-        viewBox={expanded ? `175 0 550 ${HEIGHT}` : `0 0 ${WIDTH} ${HEIGHT}`}
+        viewBox={`175 0 550 ${HEIGHT}`}
         className="sky-map-svg"
         role="group"
-        aria-label="แผนที่ดาวเหนือขอบฟ้า ทิศตะวันออกอยู่ด้านซ้ายเมื่อเงยหน้ามองท้องฟ้า ลากเพื่อหมุน หรือดับเบิลคลิกเพื่อคืนมุมมอง"
-        onPointerDown={startDrag}
-        onPointerMove={moveDrag}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onDoubleClick={resetView}
+        tabIndex={0}
+        aria-label="แผนที่ดาวเหนือขอบฟ้า กางสองนิ้วเพื่อซูม ลากเพื่อหมุน หรือเลื่อนเมื่อขยาย ใช้ปุ่มบวกลบและลูกศรได้"
+        {...handlers}
       >
         <defs>
           <radialGradient id={`${uid}-sky`}>
@@ -155,16 +128,16 @@ export default function SkyMap({
 
         <g clipPath={`url(#${uid}-clip)`}>
           {[30, 60].map((altitude) => (
-            <circle key={altitude} cx={CX} cy={CY} r={((90 - altitude) / 90) * RADIUS * safeZoom} fill="none" stroke={accent} strokeOpacity="0.09" strokeDasharray="2 6" />
+            <circle key={altitude} cx={CX+pan.x} cy={CY+pan.y} r={((90 - altitude) / 90) * RADIUS * safeZoom} fill="none" stroke={accent} strokeOpacity="0.09" strokeDasharray="2 6" />
           ))}
           {Array.from({ length: 12 }, (_, i) => {
-            const point = project(0, i * 30, rotation, 1);
-            return <line key={i} x1={CX} y1={CY} x2={point.x} y2={point.y} stroke={accent} strokeOpacity="0.045" />;
+            const point = project(0, i * 30, rotation, safeZoom, pan);
+            return <line key={i} x1={CX+pan.x} y1={CY+pan.y} x2={point.x} y2={point.y} stroke={accent} strokeOpacity="0.045" />;
           })}
 
           <g aria-hidden="true">
             {backgroundStars.map((star, i) => {
-              const { x, y } = project(star.altitude, star.azimuth, rotation, safeZoom);
+              const { x, y } = project(star.altitude, star.azimuth, rotation, safeZoom, pan);
               if (Math.hypot(x - CX, y - CY) > RADIUS) return null;
               return <circle key={i} cx={x} cy={y} r={Math.max(0.4, 1.75 - star.magnitude * 0.22)} fill={nightMode ? '#d69c92' : star.color} opacity={Math.min(0.84, Math.max(0.18, 1.05 - star.magnitude * 0.115))} />;
             })}
@@ -231,7 +204,7 @@ export default function SkyMap({
             );
           })}
           {planets.filter(planet=>planet.altitude>=0).map(planet=>{
-            const point=project(planet.altitude,planet.azimuth,rotation,safeZoom);
+            const point=project(planet.altitude,planet.azimuth,rotation,safeZoom,pan);
             if(Math.hypot(point.x-CX,point.y-CY)>RADIUS-2)return null;
             return <PlanetMarker key={planet.id} planet={planet} x={point.x} y={point.y} selected={selectedPlanetId===planet.id} onSelect={onSelectPlanet} showLabels={showLabels} nightMode={nightMode}/>;
           })}
@@ -247,7 +220,7 @@ export default function SkyMap({
             const { x, y } = project(-7, azimuth, rotation, 1);
             return <text key={label} x={x} y={y + 4} className={`compass-label ${label === 'N' ? 'north' : ''}`} fill={label === 'N' ? accent : '#79829e'} textAnchor="middle">{label}</text>;
           })}
-          <path d={`M${CX - 4} ${CY}h8 M${CX} ${CY - 4}v8`} stroke={accent} strokeOpacity="0.3" strokeWidth="0.6" />
+          <path d={`M${CX+pan.x - 4} ${CY+pan.y}h8 M${CX+pan.x} ${CY+pan.y - 4}v8`} stroke={accent} strokeOpacity="0.3" strokeWidth="0.6" />
         </g>
       </svg>
       {catalogError && <p className="map-catalog-status" role="status">โหลดแค็ตตาล็อกไม่ได้ · แสดงเฉพาะดาวเด่น</p>}

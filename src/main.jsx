@@ -9,5 +9,7 @@ import '@fontsource/noto-sans-thai/thai-500.css';
 import '@fontsource/noto-sans-thai/thai-600.css';
 import './styles.css';
 import App from './App.jsx';
+import './observatory.css';
+import './skyHome.css';
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);

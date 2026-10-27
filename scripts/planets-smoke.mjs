@@ -8,7 +8,7 @@ const errors=[];
 page.on('pageerror',e=>errors.push(e.message));
 await page.route('https://alasky.cds.unistra.fr/**',route=>route.abort());
 try {
-  await page.goto(process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/',{waitUntil:'networkidle'});
+  await page.goto(process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/?view=map',{waitUntil:'networkidle'});
   assert.equal(await page.locator('[data-planet-choice]').count(),7);
   await page.locator('[data-planet-choice="saturn"]').click();
   const card=page.locator('[data-selected-planet="saturn"]');

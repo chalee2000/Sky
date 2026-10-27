@@ -4,7 +4,7 @@ import { mkdir } from 'node:fs/promises';
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Bangkok' });
-const base = process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/';
+const base = process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/?view=map';
 const errors = [];
 const createPage = async mode => {
   const page = await context.newPage();

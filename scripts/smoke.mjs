@@ -9,7 +9,7 @@ const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 await mkdir('test-results', { recursive: true });
 try {
-  await page.goto(process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/', { waitUntil: 'networkidle' });
+  await page.goto(process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/?view=map', { waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: 'คืนนี้มีอะไรให้ค้นพบ' }).waitFor();
   assert.ok(await page.locator('.sky-map-svg circle').count() > 1000, 'real catalog is rendered');
   await page.screenshot({ path: 'test-results/desktop.png', fullPage: true });
@@ -66,7 +66,7 @@ try {
   const mobile = await context.newPage();
   await mobile.setViewportSize({ width: 390, height: 844 });
   mobile.on('pageerror', error => errors.push(error.message));
-  await mobile.goto(process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/', { waitUntil: 'networkidle' });
+  await mobile.goto(process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/?view=map', { waitUntil: 'networkidle' });
   assert.ok(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'mobile layout does not overflow');
   await mobile.screenshot({ path: 'test-results/mobile.png', fullPage: true });
   await mobile.getByRole('button', { name: 'กรุงเทพฯ', exact: true }).click();

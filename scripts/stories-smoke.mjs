@@ -4,7 +4,7 @@ import { mkdir } from 'node:fs/promises';
 import { starStories } from '../src/lib/starStories.js';
 
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
-const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/';
+const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5173/Sky/?view=map';
 const errors=[];
 try {
   await mkdir('test-results',{recursive:true});

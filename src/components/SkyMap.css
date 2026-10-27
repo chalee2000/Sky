@@ -1,5 +1,5 @@
 .sky-map { position: relative; width: 100%; min-width: 0; overflow: hidden; }
-.sky-map-svg { display: block; width: 100%; height: auto; min-height: 360px; max-height: 570px; cursor: grab; user-select: none; touch-action: pan-y; }
+.sky-map-svg { display: block; width: 100%; height: auto; aspect-ratio: 550 / 560; min-height: 0; max-height: none; cursor: grab; user-select: none; touch-action: none; }
 .sky-map.is-dragging .sky-map-svg { cursor: grabbing; }
 .sky-map .map-star { cursor: pointer; outline: none; }
 .sky-map .map-star:focus-visible .star-hit-area { fill: rgba(172, 163, 255, .16); stroke: #b8b1ff; stroke-width: 1.2; }
@@ -16,7 +16,9 @@
 .map-catalog-status { position: absolute; top: 6px; left: 16px; color: #d9ae80; font-size: 11px; }
 .sky-map-red .star-label, .sky-map-red .constellation-label { stroke: #22151c; }
 @media (max-width: 600px) {
-  .sky-map-svg { width: 150%; max-width: none; margin-left: -25%; min-height: 320px; }
+  .sky-map-svg { width: 100%; max-width: none; margin-left: 0; min-height: 0; }
   .map-orientation-note { left: 13px; font-size: 8px; bottom: 13px; }
   .sky-map .map-reset { right: 11px; bottom: 8px; font-size: 9px; padding: 5px 7px; }
 }
+
+.sky-map-svg:focus-visible { outline: 2px solid #b5a7ff; outline-offset: -4px; border-radius: 12px; }

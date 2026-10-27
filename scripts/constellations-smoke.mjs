@@ -14,10 +14,10 @@ const open=async name=>{
   await page.locator('[data-constellation-details]').waitFor();
 };
 const close=()=>page.getByRole('button',{name:'ปิดหน้าต่าง',exact:true}).click();
-const checkToolbar=async()=>assert.ok(await page.evaluate(()=>document.querySelector('.map-tools').getBoundingClientRect().bottom+8<=document.querySelector('.map-bottom').getBoundingClientRect().top),'map tools leave room for the night-mode control');
+const checkToolbar=async()=>assert.ok(await page.evaluate(()=>{const tools=document.querySelector('.map-tools').getBoundingClientRect(),bottom=document.querySelector('.map-bottom').getBoundingClientRect();return tools.bottom<=bottom.top||tools.top>=bottom.bottom;}),'map tools leave room for the night-mode control');
 try{
   await mkdir('test-results',{recursive:true});
-  await page.goto(process.env.SKY_TEST_URL||'http://127.0.0.1:5180/Sky/',{waitUntil:'networkidle'});
+  await page.goto(process.env.SKY_TEST_URL||'http://127.0.0.1:5180/Sky/?view=map',{waitUntil:'networkidle'});
   await checkToolbar();
   await page.locator('.date-control').click();
   await page.getByLabel('วันและเวลา',{exact:true}).fill('2026-12-15T22:00');

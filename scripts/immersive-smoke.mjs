@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
-const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5180/Sky/';
+const base=process.env.SKY_TEST_URL||'http://127.0.0.1:5180/Sky/?view=map';
 const errors=[];
 async function createPage(unsupported=false,viewport={width:390,height:844}){
   const page=await browser.newPage({viewport});

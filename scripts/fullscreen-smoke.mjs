@@ -4,7 +4,7 @@ import { mkdir } from 'node:fs/promises';
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
 const errors = [];
-const base = process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/';
+const base = process.env.SKY_TEST_URL || 'http://127.0.0.1:5173/Sky/?view=map';
 const enter = page => page.getByRole('button', { name: 'แสดงแผนที่เต็มหน้าจอ', exact: true }).click();
 const exit = page => page.getByRole('button', { name: 'ออกจากโหมดเต็มจอ', exact: true }).click();
 async function coversViewport(page) {
