@@ -17,7 +17,7 @@ function manualView(heading,altitude){
 }
 const direction = angle => ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(angle/45)%8];
 
-export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,focusTarget,wideView=false }) {
+export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,focusTarget,wideView=false,homeView=false }) {
   const container = useRef(null);
   const svgRef = useRef(null);
   const pointers=useRef(new Map());
@@ -64,7 +64,17 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
   zoomRef.current=scale;
   const baseFieldOfView=wideView?Math.min(150,2*Math.atan(Math.tan(55*Math.PI/180)*height/Math.max(width,1))*180/Math.PI):62;
   const fieldOfView=baseFieldOfView/scale;
-  const project = (altitude, azimuth) => wideView?projectSkyDome(altitude,azimuth,view,width,height,scale):projectToView(altitude, azimuth, view, width, height,fieldOfView);
+  const project = (altitude, azimuth) => {
+    if(!wideView)return projectToView(altitude,azimuth,view,width,height,fieldOfView);
+    const point=projectSkyDome(altitude,azimuth,view,width,height,scale);
+    // The phone home has stacked menus above the sky. Center its view below
+    // those controls; desktop and fullscreen use the exact canvas center.
+    if(point&&homeView&&width<=740&&height>width){
+      point.y+=80;
+      point.visible=point.x>=0&&point.x<=width&&point.y>=0&&point.y<=height;
+    }
+    return point;
+  };
   const turn=(heading,altitude)=>setManualAngles(previous=>({heading:wrapHeading(previous.heading+heading),altitude:clampAltitude(previous.altitude+altitude)}));
   const applyZoom=value=>{
     const next=clampZoom(value);zoomRef.current=next;onZoomChange?.(next);

@@ -12,6 +12,6 @@ export function projectSkyDome(altitude, azimuth, view, width, height, zoom = 1)
   if (depth < -1e-6) return null;
   const focal = Math.min(width, height) / (4 * Math.tan(210 * rad / 4)) * zoom;
   const x = width / 2 + 2 * focal * dot(view.right) / (1 + depth);
-  const y = height * .66 - 2 * focal * dot(view.up) / (1 + depth);
+  const y = height / 2 - 2 * focal * dot(view.up) / (1 + depth);
   return { x, y, depth, visible: x >= 0 && x <= width && y >= 0 && y <= height };
 }
