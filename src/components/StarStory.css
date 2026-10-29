@@ -10,4 +10,13 @@
 .story-tradition{border-top:1px solid #3a304b;border-bottom:1px solid #3a304b;padding:15px 0;margin-bottom:23px}.story-tradition summary{font-size:12px;color:#c7b2e4;cursor:pointer;line-height:1.9}.tradition-culture{display:block;font-size:10px;color:#9984b6;margin:16px 0 10px}.story-tradition p{font-size:13px;line-height:2.1;color:#b8adc8}.story-tradition a{display:inline-block;color:#bca5de;font-size:11px;margin:13px 0 10px}.story-tradition>small{display:block;color:#837790;font-size:10px;line-height:1.8}
 .story-facts{padding:15px;border:1px solid #343b51;border-radius:8px;background:#1b233740}.story-facts>span{display:flex;gap:7px;align-items:center;color:#b8c0d9;font-size:11px}.story-facts p{font-size:12px;line-height:1.95;color:#a9b3cc;margin:10px 0 7px}.story-facts small{color:#75829e;font-size:9px;line-height:1.8}
 .story-navigation{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:25px;padding-top:17px;border-top:1px solid #343145}.story-navigation>span{font-family:Inter,sans-serif;font-size:10px;color:#9384ac}.story-navigation>button{display:flex;align-items:center;gap:5px;font-size:11px;background:#2a2239;border:1px solid #4c3b61;border-radius:6px;color:#c6b3e0;padding:10px 9px;min-height:40px}.story-navigation>button:hover{background:#40304f}
+.story-science-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px;margin:18px 0}
+.story-science-grid>div{min-width:0}.story-science-grid .science-wide{grid-column:1/-1}
+.story-science-grid dt{font-size:11px;color:#9aabc5;margin-bottom:6px}.story-science-grid dd{margin:0;color:#e3e9f5;font-size:15px;line-height:1.7;overflow-wrap:anywhere}
+.story-science-grid dd>span{font-size:11px;color:#b0bed6}.story-science-grid small{display:block;margin-top:5px}
+.story-science-grid .science-spectrum{font:14px/1.8 Inter,sans-serif;color:#b6d9f0}.story-science-grid .science-unverified{color:#9eabc0;font-size:12px}
+.story-facts .science-catalog-note{padding:10px 0;border-top:1px solid #354056;line-height:1.9}
+.story-sources{padding-top:12px;border-top:1px solid #343b51}.story-sources h4{font-size:13px;font-weight:500;color:#c6d5ed}
+.story-sources>a{display:block;padding:8px 0;color:#abc9e8;font-size:11px;line-height:1.7;overflow-wrap:anywhere}.story-sources p{font-size:11px;color:#96a6be;line-height:1.9}
+.story-fiction-note{line-height:1.9;padding:12px;border-radius:9px;background:#b29cdb0b}
 @media(max-width:740px){.story-prose p{font-size:15px;line-height:2.2}.story-title{font-size:21px}.story-entry{font-size:10px;padding:10px;gap:6px}.story-entry svg{width:14px}.story-navigation>button{font-size:10px;padding:10px 7px}.story-navigation>span{font-size:9px}}

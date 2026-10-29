@@ -2,36 +2,74 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { stars, constellations } from './astronomy.js';
 import { starStories, createStarStory } from './starStories.js';
+import { getStarScience, spectralDescription } from './starScience.js';
+import { starScienceCatalog, starScienceSources } from './starScienceCatalog.js';
 
-test('each story uses its own star facts rather than a rotating unrelated tale',()=>{
+test('all 78 stories use matching catalog identities, spectra and sourced numbers',()=>{
   assert.equal(Object.keys(starStories).length,stars.length);
-  const texts=new Set();
+  assert.equal(Object.keys(starScienceCatalog).length,stars.length);
+  const identities=new Set();
   for(const star of stars){
-    const story=starStories[star.id];
-    const group=constellations.find(c=>c.id===star.constellationId);
+    const story=starStories[star.id], science=story.science;
+    const catalog=starScienceCatalog[star.id];
     assert.equal(story.starId,star.id);
-    assert.equal(story.constellationId,group.id);
-    assert.equal(story.kind,'astronomy-fiction');
-    assert.match(story.label,/แต่งจากข้อมูลจริง/);
+    assert.equal(story.constellationId,star.constellationId);
+    assert.equal(story.kind,'scientific-astronomy-storytelling');
+    assert.ok(catalog.matchArcseconds<3.1,`coordinate match for ${star.id}`);
+    assert.ok(catalog.catalogDistanceParsecs>0&&catalog.catalogDistanceParsecs<10000);
+    assert.ok(Number.isFinite(catalog.catalogMagnitude));
+    assert.ok(catalog.sourceIds.every(id=>starScienceSources[id]));
+    assert.equal(new URL(story.source).searchParams.get('Ident'),`HIP ${catalog.identifiers.hip}`);
     const text=story.paragraphs.join(' ');
-    assert.ok(story.title.includes(star.name));
-    for(const fact of [star.nameEn,star.description,group.description,`กลุ่มดาว${group.name}`,`${Number(star.distance).toLocaleString('th-TH')} ปีแสง`]) assert.ok(text.includes(fact),`${star.id}: missing ${fact}`);
-    assert.equal(new URL(story.source).searchParams.get('Ident'),star.nameEn);
+    for(const fact of [star.nameEn,science.designation,science.spectralType,science.magnitudeText,`${science.distanceText} ปีแสง`]) assert.ok(text.includes(fact),`${star.id}: missing ${fact}`);
+    assert.match(text,/แค็ตตาล็อก/);
     assert.doesNotMatch(text,/สังข์ทอง|ปลาบู่ทอง|ไกรทอง|โสนน้อย|พิกุลทอง|ดาวลูกไก่/);
-    texts.add(text);
+    identities.add(catalog.identifiers.hip);
   }
-  assert.equal(texts.size,stars.length);
+  assert.equal(identities.size,stars.length);
 });
-test('known mismatches stay fixed: Aldebaran, Vega and Polaris have matching facts',()=>{
-  assert.match(starStories.aldebaran.paragraphs.join(' '),/65 ปีแสง/);
+
+test('Alnasl is gamma TWO Sagittarii with sourced facts and no invented approval date',()=>{
+  const story=starStories.alnasl, science=story.science;
+  assert.equal(science.designation,'Gamma² Sagittarii (γ² Sgr)');
+  assert.equal(science.identifiers.hip,88635);
+  assert.equal(science.identifiers.hd,165135);
+  assert.equal(science.spectralType,'K0III');
+  assert.equal(science.starType,'ดาวยักษ์สีส้ม');
+  assert.equal(science.magnitudeText,'2.98');
+  assert.ok(science.distanceLy>96&&science.distanceLy<97);
+  assert.equal(science.distanceText,'96.9');
+  assert.match(science.nameMeaning,/ปลายลูกศร/);
+  assert.equal(science.namingApprovalDate,null);
+  assert.doesNotMatch(story.paragraphs.join(' '),/K1 III|21 สิงหาคม|2016/);
+});
+
+test('spectral qualifiers, composite systems and ranges are distinguished',()=>{
+  assert.equal(spectralDescription('K1+IIIb'),'ดาวยักษ์สีส้ม');
+  for(const spectrum of ['G5IIIe+G0III','B2IV+B']) assert.match(spectralDescription(spectrum),/หลายองค์ประกอบ/);
+  assert.equal(spectralDescription('F5IV-V'),'ดาวฤกษ์สเปกตรัม F');
+  assert.equal(spectralDescription('A0pCr'),'ดาวฤกษ์สเปกตรัม A');
+  assert.match(starStories.capella.science.notes,/ไม่ควรอธิบายคาเพลลาว่าเป็นดาวเดี่ยว/);
+  assert.match(starStories.acrux.science.notes,/องค์ประกอบ/);
+});
+
+test('ambiguous names resolve by HIP and unsupported name meanings stay unknown',()=>{
+  const science=starStories.gienah.science;
+  assert.equal(science.designation,'Epsilon Cygni (ε Cyg)');
+  assert.equal(science.catalogName,'Aljanah');
+  assert.equal(new URL(science.source).searchParams.get('Ident'),'HIP 102488');
+  assert.equal(starStories.vega.science.nameMeaning,null);
   assert.match(starStories.aldebaran.paragraphs.join(' '),/อยู่ใกล้โลกกว่ากระจุกดาว/);
-  assert.match(starStories.vega.paragraphs.join(' '),/กลุ่มดาวพิณ/);
   assert.match(starStories.polaris.paragraphs.join(' '),/ใกล้ขั้วฟ้าเหนือ/);
 });
-test('revised catalog values flow into the story without stale copied facts',()=>{
-  const star={...stars.find(s=>s.id==='vega'),distance:26.4,description:'ข้อมูลทดสอบที่ปรับปรุงใหม่'};
+
+test('story measurements use the cited catalog without silently mixing map estimates',()=>{
+  const star={...stars.find(s=>s.id==='vega'),distance:900,magnitude:12};
   const story=createStarStory(star,constellations.find(c=>c.id===star.constellationId));
-  assert.match(story.paragraphs.join(' '),/26.4 ปีแสง/);
-  assert.ok(story.paragraphs.join(' ').includes(star.description));
-  assert.doesNotMatch(story.paragraphs.join(' '),/25 ปีแสง/);
+  assert.equal(story.science.distanceText,'25');
+  assert.equal(story.science.magnitudeText,'0.03');
+  assert.equal(story.science.mapDistanceText,'900');
+  assert.equal(story.science.distanceDiffers,true);
+  assert.doesNotMatch(story.paragraphs.join(' '),/900 ปีแสง|12.00 แมกนิจูด/);
+  assert.throws(()=>getStarScience({id:'unknown'}),/Missing scientific profile/);
 });

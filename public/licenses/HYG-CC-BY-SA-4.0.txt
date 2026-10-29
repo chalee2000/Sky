@@ -1,0 +1,16 @@
+HYG Database v4.1 — David Nash / Astronexus and source-catalog authors
+
+Source: https://github.com/astronexus/HYG-Database
+Version used: c7f7f883fe678cc7680169a50ccd7dcc49b060ce / hyg/CURRENT/hygdata_v41.csv
+
+Licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+License summary: https://creativecommons.org/licenses/by-sa/4.0/
+Legal code: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+Sky adapts a 78-record subset of designation/cross-identifier data, expands abbreviations,
+and adds cross-catalog links and notes. The adapted HYG-derived database fields are
+provided under the same CC BY-SA 4.0 license. No endorsement by the original authors
+is implied. Original catalog values retain their source attribution.
+
+Additional BSC5 spectral data is separately credited to Hoffleit and Warren (1991).
+See public/data/star-science-sources.md for exact source hashes, methods, and caveats.
