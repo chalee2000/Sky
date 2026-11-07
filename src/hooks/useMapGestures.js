@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { clampMapPan, clampMapZoom, zoomMapAtPoint } from '../lib/mapGestures.js';
 import useWheelZoom from './useWheelZoom.js';
 
-export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, center, radius }) {
+export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, onToggleFullscreen, center, radius }) {
   const [transform, setTransform] = useState({ pan:{x:0,y:0}, rotation:0 });
   const [dragging, setDragging] = useState(false);
   const view = useRef({ ...transform, zoom:clampMapZoom(zoom) });
@@ -130,6 +130,10 @@ export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectSta
     // Pointer selection is handled above after distinguishing a tap from a
     // gesture. Keyboard and assistive-technology clicks still reach markers.
     onClickCapture:event=>{if(event.detail>0){event.preventDefault();event.stopPropagation();}},
-    onDoubleClick:reset, onKeyDown:keyDown,
+    onDoubleClick:event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      if(event.button===0&&!moved.current)onToggleFullscreen?.();
+    }, onKeyDown:keyDown,
   }};
 }

@@ -17,7 +17,7 @@ function manualView(heading,altitude){
 }
 const direction = angle => ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(angle/45)%8];
 
-export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,focusTarget,wideView=false,homeView=false }) {
+export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,onToggleFullscreen,focusTarget,wideView=false,homeView=false }) {
   const container = useRef(null);
   const svgRef = useRef(null);
   const pointers=useRef(new Map());
@@ -137,6 +137,11 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
       event.preventDefault();event.stopPropagation();
     }
   };
+  const doubleClick=event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    if(event.button===0&&!suppressClick.current)onToggleFullscreen?.();
+  };
   const keyDown=event=>{
     if(event.target!==event.currentTarget)return;
     const shifts={ArrowLeft:[-5,0],ArrowRight:[5,0],ArrowUp:[0,5],ArrowDown:[0,-5]};
@@ -171,7 +176,7 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
     return path;
   }
   return <div ref={container} className={`sky-pointer ${manual?'sky-pointer-manual':''}`} data-manual={manual} data-projection={wideView?'stereographic':'perspective'} data-heading={view?.heading.toFixed(1)} data-altitude={view?.altitude.toFixed(1)} data-fov={fieldOfView.toFixed(1)} data-zoom={scale.toFixed(2)} tabIndex={0} role="group" aria-label={manual?'ท้องฟ้าเต็มพื้นที่ ลากหรือใช้ปุ่มลูกศรเพื่อเปลี่ยนทิศ กางสองนิ้วหรือเลื่อนล้อเมาส์เพื่อซูม':'ท้องฟ้าตามทิศมือถือ กางสองนิ้วหรือใช้ปุ่มบวกลบเพื่อซูม'} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerCancel} onLostPointerCapture={event=>{if(event.target===event.currentTarget)pointerUp(event);}} onClickCapture={clickCapture} onKeyDown={keyDown}>
-    <svg ref={svgRef} className="sky-pointer-svg" viewBox={`0 0 ${width} ${height}`} role="group" aria-label={manual?'แผนที่ท้องฟ้ารอบตัวตามตำแหน่งผู้สังเกต':'แผนที่ดาวตามทิศที่กล้องหลังมือถือชี้'}>
+    <svg ref={svgRef} className="sky-pointer-svg" viewBox={`0 0 ${width} ${height}`} role="group" aria-label={manual?'แผนที่ท้องฟ้ารอบตัวตามตำแหน่งผู้สังเกต':'แผนที่ดาวตามทิศที่กล้องหลังมือถือชี้'} aria-description="ดับเบิลคลิกเพื่อเข้า–ออกเต็มจอ" onDoubleClick={doubleClick}>
       <defs><radialGradient id={`${uid}-sky`}><stop stopColor={nightMode?'#21131b':'#101a32'}/><stop offset="1" stopColor="#03070f"/></radialGradient><radialGradient id={`${uid}-star-glow`}><stop stopColor="#f4f7ff" stopOpacity=".85"/><stop offset=".25" stopColor="#afd5ff" stopOpacity=".45"/><stop offset="1" stopColor="#71b8ff" stopOpacity="0"/></radialGradient><clipPath id={`${uid}-clip`}><rect width={width} height={height}/></clipPath></defs>
       <rect width={width} height={height} fill={`url(#${uid}-sky)`}/>
       <g clipPath={`url(#${uid}-clip)`}>

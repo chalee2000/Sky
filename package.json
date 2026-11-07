@@ -11,6 +11,7 @@
     "test:e2e": "node scripts/smoke.mjs",
     "test:sensors": "node scripts/orientation-smoke.mjs",
     "test:fullscreen": "node scripts/fullscreen-smoke.mjs",
+    "test:doubleclick": "node scripts/doubleclick-fullscreen-smoke.mjs",
     "test:stories": "node scripts/stories-smoke.mjs",
     "test:images": "node scripts/images-smoke.mjs",
     "test:planets": "node scripts/planets-smoke.mjs",

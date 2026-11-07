@@ -35,6 +35,7 @@ export default function SkyMap({
   onSelectStar,
   zoom = 1,
   onZoomChange,
+  onToggleFullscreen,
   nightMode = false,
   planets = [],
   selectedPlanetId,
@@ -49,7 +50,7 @@ export default function SkyMap({
   const longitude = location?.longitude ?? 100.5018;
   const timestamp = date instanceof Date ? date.getTime() : new Date(date).getTime();
   const { rotation, pan, dragging, safeZoom, reset:resetView, handlers } = useMapGestures({
-    svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, center:{x:CX,y:CY}, radius:RADIUS,
+    svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, onToggleFullscreen, center:{x:CX,y:CY}, radius:RADIUS,
   });
 
   useEffect(() => {
@@ -106,7 +107,7 @@ export default function SkyMap({
         className="sky-map-svg"
         role="group"
         tabIndex={0}
-        aria-label="แผนที่ดาวเหนือขอบฟ้า กางสองนิ้วหรือเลื่อนล้อเมาส์เพื่อซูม ลากเพื่อหมุน หรือเลื่อนเมื่อขยาย ใช้ปุ่มบวกลบและลูกศรได้"
+        aria-label="แผนที่ดาวเหนือขอบฟ้า กางสองนิ้วหรือเลื่อนล้อเมาส์เพื่อซูม ลากเพื่อหมุน หรือเลื่อนเมื่อขยาย ใช้ปุ่มบวกลบและลูกศรได้ ดับเบิลคลิกเพื่อเข้า–ออกเต็มจอ"
         {...handlers}
       >
         <defs>
