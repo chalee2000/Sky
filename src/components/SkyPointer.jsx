@@ -7,6 +7,7 @@ import { clampMapZoom as clampZoom } from '../lib/mapGestures.js';
 import useWheelZoom from '../hooks/useWheelZoom.js';
 import './SkyPointer.css';
 import { PlanetMarker } from './Planets.jsx';
+import { DeepSkyMarker } from './DeepSky.jsx';
 import PointerConstellations from './PointerConstellations.jsx';
 
 const clampAltitude=value=>Math.max(-10,Math.min(89,value));
@@ -17,7 +18,7 @@ function manualView(heading,altitude){
 }
 const direction = angle => ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(angle/45)%8];
 
-export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,onToggleFullscreen,focusTarget,wideView=false,homeView=false }) {
+export default function SkyPointer({ sensor, date, location, showLines, showLabels, selectedStarId, onSelectStar, nightMode, planets=[],selectedPlanetId,onSelectPlanet,manual=false,zoom=1,onZoomChange,onToggleFullscreen,focusTarget,wideView=false,homeView=false,homeControlsExpanded=false,deepSky=[],selectedDeepSkyId,onSelectDeepSky }) {
   const container = useRef(null);
   const svgRef = useRef(null);
   const pointers=useRef(new Map());
@@ -57,7 +58,7 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
   }, []);
   const timestamp = date.getTime();
   const namedStars = useMemo(() => stars.map(star => ({ ...star, ...equatorialToHorizontal(star.ra, star.dec, new Date(timestamp), location.latitude, location.longitude) })), [timestamp, location.latitude, location.longitude]);
-  const backgroundStars = useMemo(() => catalog.map(([ra, dec, magnitude, bv]) => ({ magnitude, color: Number(bv)>1?'#ffc897':'#d6e4ff', ...equatorialToHorizontal(ra, dec, new Date(timestamp), location.latitude, location.longitude) })).filter(star => star.altitude >= 0), [catalog, timestamp, location.latitude, location.longitude]);
+  const backgroundStars = useMemo(() => catalog.map(([ra, dec, magnitude, bv]) => ({ magnitude, color: bv===''||bv===null?'#e8eaff':Number(bv)>1?'#ffc897':'#d6e4ff', ...equatorialToHorizontal(ra, dec, new Date(timestamp), location.latitude, location.longitude) })).filter(star => star.altitude >= 0), [catalog, timestamp, location.latitude, location.longitude]);
   const { width, height } = size;
   const view = manual ? manualView(manualAngles.heading,manualAngles.altitude) : sensor.view;
   const scale=clampZoom(zoom);
@@ -68,9 +69,10 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
     if(!wideView)return projectToView(altitude,azimuth,view,width,height,fieldOfView);
     const point=projectSkyDome(altitude,azimuth,view,width,height,scale);
     // The phone home has stacked menus above the sky. Center its view below
-    // those controls; desktop and fullscreen use the exact canvas center.
+    // those controls, or above the expanded dock; desktop and fullscreen
+    // use the exact canvas center.
     if(point&&homeView&&width<=740&&height>width){
-      point.y+=80;
+      point.y+=homeControlsExpanded?-50:80;
       point.visible=point.x>=0&&point.x<=width&&point.y>=0&&point.y<=height;
     }
     return point;
@@ -176,14 +178,15 @@ export default function SkyPointer({ sensor, date, location, showLines, showLabe
     return path;
   }
   return <div ref={container} className={`sky-pointer ${manual?'sky-pointer-manual':''}`} data-manual={manual} data-projection={wideView?'stereographic':'perspective'} data-heading={view?.heading.toFixed(1)} data-altitude={view?.altitude.toFixed(1)} data-fov={fieldOfView.toFixed(1)} data-zoom={scale.toFixed(2)} tabIndex={0} role="group" aria-label={manual?'ท้องฟ้าเต็มพื้นที่ ลากหรือใช้ปุ่มลูกศรเพื่อเปลี่ยนทิศ กางสองนิ้วหรือเลื่อนล้อเมาส์เพื่อซูม':'ท้องฟ้าตามทิศมือถือ กางสองนิ้วหรือใช้ปุ่มบวกลบเพื่อซูม'} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerCancel} onLostPointerCapture={event=>{if(event.target===event.currentTarget)pointerUp(event);}} onClickCapture={clickCapture} onKeyDown={keyDown}>
-    <svg ref={svgRef} className="sky-pointer-svg" viewBox={`0 0 ${width} ${height}`} role="group" aria-label={manual?'แผนที่ท้องฟ้ารอบตัวตามตำแหน่งผู้สังเกต':'แผนที่ดาวตามทิศที่กล้องหลังมือถือชี้'} aria-description="ดับเบิลคลิกเพื่อเข้า–ออกเต็มจอ" onDoubleClick={doubleClick}>
+    <svg ref={svgRef} className="sky-pointer-svg" data-catalog-count={catalog.length} data-magnitude-limit={6+Math.min(1,scale-1)} viewBox={`0 0 ${width} ${height}`} role="group" aria-label={manual?'แผนที่ท้องฟ้ารอบตัวตามตำแหน่งผู้สังเกต':'แผนที่ดาวตามทิศที่กล้องหลังมือถือชี้'} aria-description="ดับเบิลคลิกเพื่อเข้า–ออกเต็มจอ" onDoubleClick={doubleClick}>
       <defs><radialGradient id={`${uid}-sky`}><stop stopColor={nightMode?'#21131b':'#101a32'}/><stop offset="1" stopColor="#03070f"/></radialGradient><radialGradient id={`${uid}-star-glow`}><stop stopColor="#f4f7ff" stopOpacity=".85"/><stop offset=".25" stopColor="#afd5ff" stopOpacity=".45"/><stop offset="1" stopColor="#71b8ff" stopOpacity="0"/></radialGradient><clipPath id={`${uid}-clip`}><rect width={width} height={height}/></clipPath></defs>
       <rect width={width} height={height} fill={`url(#${uid}-sky)`}/>
       <g clipPath={`url(#${uid}-clip)`}>
         {view && <g aria-hidden="true">{[0,15,30,60].map(alt => <path key={alt} d={curve(Array.from({length:181},(_,i)=>[alt,i*2]))} fill="none" stroke={alt===0?'#36b9ed':accent} strokeOpacity={alt===0?.65:.045} strokeWidth={alt===0?1.4:.6} strokeDasharray={alt===0?undefined:'3 6'}/>)}{Array.from({length:12},(_,i)=><path key={i} d={curve(Array.from({length:46},(_,j)=>[j*2,i*30]))} fill="none" stroke={accent} strokeOpacity=".035" strokeWidth=".6"/>)}</g>}
-        {view && backgroundStars.map((star,i) => { const p=project(star.altitude,star.azimuth); return p?.visible && <circle key={i} cx={p.x} cy={p.y} r={wideView?Math.max(.35,1.5-star.magnitude*.17):Math.max(.55,2.1-star.magnitude*.24)} fill={nightMode?'#d5a292':star.color} opacity={wideView?Math.max(.035,.5-star.magnitude*.07):Math.max(.25,.95-star.magnitude*.09)}/>; })}
+        {view && backgroundStars.map((star,i) => { if(star.magnitude>6+Math.min(1,scale-1))return null; const p=project(star.altitude,star.azimuth); return p?.visible && <circle key={i} cx={p.x} cy={p.y} r={wideView?Math.max(.35,1.5-star.magnitude*.17):Math.max(.55,2.1-star.magnitude*.24)} fill={nightMode?'#d5a292':star.color} opacity={wideView?Math.max(.035,.5-star.magnitude*.07):Math.max(.25,.95-star.magnitude*.09)}/>; })}
         {view && showLines && <PointerConstellations starLabelIds={starLabelIds} projectedStars={projected} constellations={constellations} selectedStarId={selectedStarId} width={width} height={height} showLabels={showLabels} nightMode={nightMode}/>}
         {view && projected.filter(star=>star.point?.visible).map(star=><g key={star.id} role="button" tabIndex={0} className="pointer-star" aria-label={`${star.name} (${star.nameEn})`} aria-pressed={selectedStarId===star.id} onClick={()=>onSelectStar(star.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelectStar(star.id);}}}><title>{star.name} · {star.nameEn}</title>{!nightMode&&<circle cx={star.point.x} cy={star.point.y} r={star.magnitude<1?14:9} fill={`url(#${uid}-star-glow)`} pointerEvents="none"/>}{selectedStarId===star.id&&<circle cx={star.point.x} cy={star.point.y} r="15" fill="none" stroke={accent} strokeWidth="1"/>}<circle cx={star.point.x} cy={star.point.y} r={Math.max(1.6,3.6-star.magnitude*.5)} fill={nightMode?'#f0baa7':star.color}/>{starLabelIds.has(star.id)&&<text x={star.point.x+10} y={star.point.y-10} fill="#d7d8ec" className="pointer-star-label">{star.name}</text>}<circle cx={star.point.x} cy={star.point.y} r="13" fill="transparent" className="pointer-star-hit"/></g>)}
+        {view && deepSky.filter(object=>object.altitude>=0).sort((a,b)=>Number(a.id===selectedDeepSkyId)-Number(b.id===selectedDeepSkyId)||(b.magnitude??99)-(a.magnitude??99)).map(object=>{const p=project(object.altitude,object.azimuth);return p?.visible&&<DeepSkyMarker key={object.id} object={object} x={p.x} y={p.y} selected={selectedDeepSkyId===object.id} onSelect={onSelectDeepSky} showLabels={showLabels&&(scale>=1.5||(object.magnitude!==null&&object.magnitude<=6))} nightMode={nightMode}/>;})}
         {view && planets.filter(planet=>planet.altitude>=0).map(planet=>{const p=project(planet.altitude,planet.azimuth);return p?.visible&&<PlanetMarker key={planet.id} planet={planet} x={p.x} y={p.y} selected={selectedPlanetId===planet.id} onSelect={onSelectPlanet} showLabels={showLabels} nightMode={nightMode} pointer/>;})}
         {view && [['เหนือ (N)',0],['ตะวันออก (E)',90],['ใต้ (S)',180],['ตะวันตก (W)',270]].map(([label,az])=>{const p=project(0,az);return p&&<text key={label} x={p.x} y={p.y-9} textAnchor="middle" fill="#5dceff" fontSize="13">{label}</text>;})}
       </g>

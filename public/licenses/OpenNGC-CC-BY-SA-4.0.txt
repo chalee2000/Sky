@@ -1,0 +1,28 @@
+OpenNGC catalog adaptation for Sky
+
+Original database: OpenNGC by Mattia Verga
+https://github.com/mattiaverga/OpenNGC
+Source revision: be3cd6c5498806a2fbb2f7e0452ef802dbb02be0
+Original files: database_files/NGC.csv and database_files/addendum.csv
+
+Licensed under Creative Commons Attribution-ShareAlike 4.0 International.
+License: https://creativecommons.org/licenses/by-sa/4.0/
+Legal code: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+Sky modifications: selected 32 objects; converted sexagesimal J2000
+coordinates to decimal hours/degrees; added Thai display names and
+educational descriptions, categories, search aliases and image framing;
+preserved source identifiers, field source codes and missing magnitudes;
+withheld two magnitude values pending verification.
+
+The adapted catalog in src/lib/deepSky.js and its accompanying catalog
+provenance/educational descriptions are offered under CC BY-SA 4.0.
+This does not change licenses applicable to other application code.
+
+Data sources acknowledged by OpenNGC: NASA/IPAC Extragalactic Database
+(NED), HyperLEDA, SIMBAD operated at CDS Strasbourg, HEASARC, and
+Harold Corwin's NGC/IC Positions and Notes. See the original README
+and the Sources field for attribution of individual fields.
+
+See public/data/deep-sky-sources.md for source URLs, checksums,
+modifications, uncertainty, coordinate limitations and image attribution.

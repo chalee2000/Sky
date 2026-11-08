@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { clampMapPan, clampMapZoom, zoomMapAtPoint } from '../lib/mapGestures.js';
 import useWheelZoom from './useWheelZoom.js';
 
-export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, onToggleFullscreen, center, radius }) {
+export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, onSelectDeepSky, onToggleFullscreen, center, radius }) {
   const [transform, setTransform] = useState({ pan:{x:0,y:0}, rotation:0 });
   const [dragging, setDragging] = useState(false);
   const view = useRef({ ...transform, zoom:clampMapZoom(zoom) });
@@ -44,8 +44,8 @@ export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectSta
   const pointerDown = event => {
     if (event.button !== 0) return;
     if (!pointers.current.size) moved.current = false;
-    const target = event.target.closest('[data-star],[data-planet]');
-    pointers.current.set(event.pointerId, { ...point(event), star:target?.dataset.star, planet:target?.dataset.planet });
+    const target = event.target.closest('[data-star],[data-planet],[data-deep-sky]');
+    pointers.current.set(event.pointerId, { ...point(event), star:target?.dataset.star, planet:target?.dataset.planet, deepSky:target?.dataset.deepSky });
     // Capture on the stable SVG; moving stars can otherwise lose pointer capture
     // when they are clipped out of the viewport during a pan.
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -91,6 +91,7 @@ export default function useMapGestures({ svgRef, zoom, onZoomChange, onSelectSta
     if (tapped) {
       if (pointer.star) onSelectStar?.(pointer.star);
       if (pointer.planet) onSelectPlanet?.(pointer.planet);
+      if (pointer.deepSky) onSelectDeepSky?.(pointer.deepSky);
     }
   };
   const zoomAt = (nextZoom, anchor=center) => {

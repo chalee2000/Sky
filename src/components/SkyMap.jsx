@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { constellations, equatorialToHorizontal, stars } from '../lib/astronomy';
 import './SkyMap.css';
 import { PlanetMarker } from './Planets.jsx';
+import { DeepSkyMarker } from './DeepSky.jsx';
 import useMapGestures from '../hooks/useMapGestures.js';
 
 const WIDTH = 900;
@@ -18,6 +19,7 @@ function project(altitude, azimuth, rotation, zoom, pan = {x:0,y:0}) {
 }
 
 function colorForIndex(value) {
+  if (value === '' || value === null) return '#e8eaff';
   const index = Number(value);
   if (!Number.isFinite(index)) return '#e8eaff';
   if (index < 0.1) return '#b9d2ff';
@@ -40,6 +42,9 @@ export default function SkyMap({
   planets = [],
   selectedPlanetId,
   onSelectPlanet,
+  deepSky = [],
+  selectedDeepSkyId,
+  onSelectDeepSky,
 }) {
   const uid = useId().replaceAll(':', '');
   const [catalog, setCatalog] = useState([]);
@@ -50,7 +55,7 @@ export default function SkyMap({
   const longitude = location?.longitude ?? 100.5018;
   const timestamp = date instanceof Date ? date.getTime() : new Date(date).getTime();
   const { rotation, pan, dragging, safeZoom, reset:resetView, handlers } = useMapGestures({
-    svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, onToggleFullscreen, center:{x:CX,y:CY}, radius:RADIUS,
+    svgRef, zoom, onZoomChange, onSelectStar, onSelectPlanet, onSelectDeepSky, onToggleFullscreen, center:{x:CX,y:CY}, radius:RADIUS,
   });
 
   useEffect(() => {
@@ -105,6 +110,8 @@ export default function SkyMap({
         ref={svgRef}
         viewBox={`175 0 550 ${HEIGHT}`}
         className="sky-map-svg"
+        data-catalog-count={catalog.length}
+        data-magnitude-limit={6+Math.min(1,safeZoom-1)}
         role="group"
         tabIndex={0}
         aria-label="แผนที่ดาวเหนือขอบฟ้า กางสองนิ้วหรือเลื่อนล้อเมาส์เพื่อซูม ลากเพื่อหมุน หรือเลื่อนเมื่อขยาย ใช้ปุ่มบวกลบและลูกศรได้ ดับเบิลคลิกเพื่อเข้า–ออกเต็มจอ"
@@ -138,6 +145,7 @@ export default function SkyMap({
 
           <g aria-hidden="true">
             {backgroundStars.map((star, i) => {
+              if (star.magnitude > 6 + Math.min(1, safeZoom - 1)) return null;
               const { x, y } = project(star.altitude, star.azimuth, rotation, safeZoom, pan);
               if (Math.hypot(x - CX, y - CY) > RADIUS) return null;
               return <circle key={i} cx={x} cy={y} r={Math.max(0.4, 1.75 - star.magnitude * 0.22)} fill={nightMode ? '#d69c92' : star.color} opacity={Math.min(0.84, Math.max(0.18, 1.05 - star.magnitude * 0.115))} />;
@@ -203,6 +211,11 @@ export default function SkyMap({
                 <circle cx={star.x} cy={star.y} r="10" fill="transparent" className="star-hit-area" />
               </g>
             );
+          })}
+          {deepSky.filter(object=>object.altitude>=0).sort((a,b)=>Number(a.id===selectedDeepSkyId)-Number(b.id===selectedDeepSkyId)||(b.magnitude??99)-(a.magnitude??99)).map(object=>{
+            const point=project(object.altitude,object.azimuth,rotation,safeZoom,pan);
+            if(Math.hypot(point.x-CX,point.y-CY)>RADIUS-12)return null;
+            return <DeepSkyMarker key={object.id} object={object} x={point.x} y={point.y} selected={selectedDeepSkyId===object.id} onSelect={onSelectDeepSky} showLabels={showLabels&&(safeZoom>=1.5||(object.magnitude!==null&&object.magnitude<=6))} nightMode={nightMode}/>;
           })}
           {planets.filter(planet=>planet.altitude>=0).map(planet=>{
             const point=project(planet.altitude,planet.azimuth,rotation,safeZoom,pan);
