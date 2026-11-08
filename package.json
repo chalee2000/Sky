@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js && node src/lib/planets.test.js && node src/lib/celestialModels.test.js && node src/lib/constellationDetails.test.js && node src/lib/skyDome.test.js && node src/lib/deepSky.test.js && node src/lib/deepSkyImages.test.js && node scripts/verify-star-catalog.mjs",
+    "test": "node src/lib/astronomy.test.js && node src/lib/orientation.test.js && node src/lib/starStories.test.js && node src/lib/starImages.test.js && node src/lib/planets.test.js && node src/lib/celestialModels.test.js && node src/lib/constellationDetails.test.js && node src/lib/skyDome.test.js && node src/lib/deepSky.test.js && node src/lib/deepSkyImages.test.js && node scripts/verify-star-catalog.mjs && node src/lib/skyLabels.test.js",
     "test:e2e": "node scripts/smoke.mjs",
     "test:sensors": "node scripts/orientation-smoke.mjs",
     "test:fullscreen": "node scripts/fullscreen-smoke.mjs",
@@ -21,7 +21,8 @@
     "test:gestures": "node scripts/map-gestures-smoke.mjs && node scripts/pointer-gestures-smoke.mjs",
     "test:layout": "node scripts/ui-layout-smoke.mjs",
     "test:wheel": "node scripts/wheel-zoom-smoke.mjs",
-    "test:deep-sky": "node scripts/deep-sky-smoke.mjs"
+    "test:deep-sky": "node scripts/deep-sky-smoke.mjs",
+    "test:polish": "node scripts/sky-polish-smoke.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

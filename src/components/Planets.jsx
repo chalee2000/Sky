@@ -3,10 +3,11 @@ import { ArrowRight, ExternalLink, Orbit } from 'lucide-react';
 import { planetVisibility } from '../lib/planets.js';
 import './Planets.css';
 import CelestialModel from './CelestialModel.jsx';
+import StarGlyph from './StarGlyph.jsx';
 
-export function PlanetMarker({planet,x,y,selected,onSelect,showLabels,nightMode,pointer=false}) {
+export function PlanetMarker({planet,x,y,selected,onSelect,showLabels,nightMode,pointer=false,labelPlacement}) {
   const color=nightMode?'#e8b5a2':planet.color;
-  return <g className={pointer?'pointer-planet':'map-planet'} data-planet={planet.id} role="button" tabIndex={0} aria-label={`${planet.name} (${planet.nameEn}) สูง ${planet.altitude.toFixed(0)} องศา`} aria-pressed={selected} onClick={()=>onSelect?.(planet.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect?.(planet.id);}}}><title>{planet.name} · {planet.nameEn} · ดาวเคราะห์</title>{selected&&<circle cx={x} cy={y} r="15" fill="none" stroke="#c9b1f1" strokeWidth="1"/>}{planet.id==='saturn'&&<ellipse cx={x} cy={y} rx="10" ry="3.3" transform={`rotate(-25 ${x} ${y})`} fill="none" stroke={color} strokeWidth="1.8"/>}<circle cx={x} cy={y} r="6" fill={color} stroke="#f3e5c9" strokeOpacity=".4" strokeWidth=".6"/>{(showLabels||selected)&&<text x={x+13} y={y-9} fill={color} className="planet-map-label">{planet.name}</text>}<circle cx={x} cy={y} r="13" fill="transparent" className="planet-hit"/></g>;
+  return <g className={pointer?'pointer-planet':'map-planet'} data-planet={planet.id} role="button" tabIndex={0} aria-label={`${planet.name} (${planet.nameEn}) สูง ${planet.altitude.toFixed(0)} องศา`} aria-pressed={selected} onClick={()=>onSelect?.(planet.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect?.(planet.id);}}}><title>{planet.name} · {planet.nameEn} · ดาวเคราะห์</title>{selected&&<circle cx={x} cy={y} r="15" fill="none" stroke="#c9b1f1" strokeWidth="1"/>}{planet.id==='saturn'&&<ellipse cx={x} cy={y} rx="6" ry="2.3" transform={`rotate(-25 ${x} ${y})`} fill="none" stroke={color} strokeOpacity=".6" strokeWidth=".8"/>}<StarGlyph x={x} y={y} magnitude={planet.magnitude} color={color} nightMode={nightMode}/>{(labelPlacement!==null&&(showLabels||selected))&&<text x={labelPlacement?.x??x+13} y={labelPlacement?.y??y-9} textAnchor={labelPlacement?.anchor||'start'} fill={color} className="planet-map-label">{planet.name}</text>}<circle cx={x} cy={y} r="13" fill="transparent" className="planet-hit"/></g>;
 }
 
 export function PlanetArt({planet}) {

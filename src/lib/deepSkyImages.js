@@ -10,7 +10,7 @@ export function deepSkyImage(object) {
   const raDegrees = Number((object.ra * 15).toFixed(6));
   const url = new URL(SURVEY_IMAGE_SERVICE);
   url.search = new URLSearchParams({
-    hips: 'CDS/P/DSS2/color', width: '800', height: '800',
+    hips: 'CDS/P/DSS2/color', width: '1200', height: '1200',
     fov: String(object.imageFov), projection: 'TAN', coordsys: 'icrs',
     ra: String(raDegrees), dec: String(object.dec), rotation: '0', format: 'jpg',
   }).toString();

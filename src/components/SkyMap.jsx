@@ -4,6 +4,8 @@ import './SkyMap.css';
 import { PlanetMarker } from './Planets.jsx';
 import { DeepSkyMarker } from './DeepSky.jsx';
 import useMapGestures from '../hooks/useMapGestures.js';
+import StarGlyph from './StarGlyph.jsx';
+import { layoutSkyLabels } from '../lib/skyLabels.js';
 
 const WIDTH = 900;
 const HEIGHT = 560;
@@ -102,6 +104,20 @@ export default function SkyMap({
   const byId = useMemo(() => new Map(projectedStars.map((star) => [star.id, star])), [projectedStars]);
   const visibleStars = projectedStars.filter((star) => star.altitude >= 0 && Math.hypot(star.x - CX, star.y - CY) < RADIUS - 2);
   const selectedStar = byId.get(selectedStarId);
+  const projectedPlanets=planets.filter(object=>object.altitude>=0).map(object=>({...object,...project(object.altitude,object.azimuth,rotation,safeZoom,pan)})).filter(object=>Math.hypot(object.x-CX,object.y-CY)<RADIUS-12);
+  const projectedDeepSky=deepSky.filter(object=>object.altitude>=0).map(object=>({...object,...project(object.altitude,object.azimuth,rotation,safeZoom,pan)})).filter(object=>Math.hypot(object.x-CX,object.y-CY)<RADIUS-12).sort((a,b)=>Number(a.id===selectedDeepSkyId)-Number(b.id===selectedDeepSkyId)||(b.magnitude??99)-(a.magnitude??99));
+  const groupLabels=showLines&&showLabels?constellations.flatMap(group=>{
+    const members=group.starIds.map(id=>byId.get(id)).filter(star=>star&&star.altitude>8&&Math.hypot(star.x-CX,star.y-CY)<RADIUS-28);
+    return members.length<3?[]:[{id:`group-${group.id}`,text:group.nameEn.toUpperCase(),x:members.reduce((sum,star)=>sum+star.x,0)/members.length,y:members.reduce((sum,star)=>sum+star.y,0)/members.length,priority:10,size:10}];
+  }):[];
+  const labelItems=[
+    ...visibleStars.filter(star=>star.id===selectedStarId||star.id===hoveredStar||(showLabels&&star.magnitude<1.7)).map(star=>({id:`star-${star.id}`,text:star.nameEn,x:star.x,y:star.y,priority:star.id===selectedStarId?1000:200-star.magnitude,size:14})),
+    ...projectedPlanets.filter(object=>showLabels||object.id===selectedPlanetId).map(object=>({id:`planet-${object.id}`,text:object.name,x:object.x,y:object.y,priority:object.id===selectedPlanetId?1000:350})),
+    ...projectedDeepSky.filter(object=>object.id===selectedDeepSkyId||(showLabels&&(safeZoom>=1.5||(object.magnitude!==null&&object.magnitude<=6)))).map(object=>({id:`deep-${object.id}`,text:object.id===selectedDeepSkyId?object.name:object.catalogId,x:object.x,y:object.y,priority:object.id===selectedDeepSkyId?1000:100-(object.magnitude??12)})),
+    ...groupLabels,
+  ];
+  const {placements:labels}=layoutSkyLabels(labelItems,WIDTH,HEIGHT,{reserved:[...visibleStars,...projectedPlanets,...projectedDeepSky].map(object=>({x:object.x-3,y:object.y-3,width:6,height:6})),allowed:box=>[[box.x,box.y],[box.x+box.width,box.y],[box.x,box.y+box.height],[box.x+box.width,box.y+box.height]].every(([x,y])=>Math.hypot(x-CX,y-CY)<RADIUS-4)});
+
   const accent = nightMode ? '#e88474' : '#aaa3ff';
 
   return (
@@ -164,18 +180,12 @@ export default function SkyMap({
             </g>)}
           </g>}
 
-          {showLines && showLabels && constellations.map((constellation) => {
-            const members = constellation.starIds.map((id) => byId.get(id)).filter((star) => star && star.altitude > 8 && Math.hypot(star.x - CX, star.y - CY) < RADIUS - 28);
-            if (members.length < 3) return null;
-            const x = members.reduce((sum, star) => sum + star.x, 0) / members.length;
-            const y = members.reduce((sum, star) => sum + star.y, 0) / members.length;
-            return <text key={constellation.id} x={x} y={y + 23} className="constellation-label" textAnchor="middle" fill={accent} opacity="0.6">{constellation.nameEn.toUpperCase()}</text>;
-          })}
+          {groupLabels.map(group=>{const label=labels.get(group.id);return label&&<text key={group.id} x={label.x} y={label.y} className="constellation-label" textAnchor={label.anchor} fill={accent} opacity="0.5">{group.text}</text>;})}
 
           {visibleStars.map((star) => {
             const isSelected = star.id === selectedStarId;
             const isHovered = star.id === hoveredStar;
-            const radius = Math.max(1.25, 2.7 - star.magnitude * 0.38);
+            const label = labels.get(`star-${star.id}`);
             const color = nightMode ? '#edb4a6' : (star.color || '#e8eeff');
             return (
               <g
@@ -199,29 +209,16 @@ export default function SkyMap({
                 onBlur={() => setHoveredStar(null)}
               >
                 <title>{star.name} · {star.nameEn}</title>
-                {(star.magnitude < 1.1 || isSelected) && <circle cx={star.x} cy={star.y} r={isSelected ? 32 : 12} fill={`url(#${uid}-glow)`} aria-hidden="true" />}
-                {isSelected && <>
-                  <circle cx={star.x} cy={star.y} r="13" fill="none" stroke={accent} strokeWidth="0.9" opacity="0.8" />
-                  <circle cx={star.x} cy={star.y} r="19" fill="none" stroke={accent} strokeWidth="0.65" strokeDasharray="2 5" opacity="0.5" />
-                </>}
-                {isHovered && !isSelected && <circle cx={star.x} cy={star.y} r="11" fill={accent} fillOpacity="0.08" stroke={accent} strokeOpacity="0.6" strokeWidth="0.7" />}
-                <circle cx={star.x} cy={star.y} r={radius} fill={color} />
-                {star.magnitude < 0.7 && <path d={`M${star.x - 5} ${star.y}h10 M${star.x} ${star.y - 5}v10`} stroke={color} strokeOpacity="0.35" strokeWidth="0.6" aria-hidden="true" />}
-                {(showLabels && star.magnitude < 1.7 || isSelected || isHovered) && <text x={star.x + (isSelected ? 22 : 9)} y={star.y - 8} className={`star-label ${isSelected ? 'selected-label' : ''}`} fill={isSelected ? '#e9e6ff' : '#a6aec8'}>{star.nameEn}</text>}
+                <StarGlyph x={star.x} y={star.y} magnitude={star.magnitude} color={color} nightMode={nightMode}/>
+                {isSelected&&<circle cx={star.x} cy={star.y} r="12" fill="none" stroke={accent} strokeWidth=".8" opacity=".8"/>}
+                {isHovered&&!isSelected&&<circle cx={star.x} cy={star.y} r="10" fill="none" stroke={accent} strokeOpacity=".5" strokeWidth=".7"/>}
+                {label&&<text x={label.x} y={label.y} textAnchor={label.anchor} className={`star-label ${isSelected?'selected-label':''}`} fill={isSelected?'#e9e6ff':'#a6b5ca'}>{star.nameEn}</text>}
                 <circle cx={star.x} cy={star.y} r="10" fill="transparent" className="star-hit-area" />
               </g>
             );
           })}
-          {deepSky.filter(object=>object.altitude>=0).sort((a,b)=>Number(a.id===selectedDeepSkyId)-Number(b.id===selectedDeepSkyId)||(b.magnitude??99)-(a.magnitude??99)).map(object=>{
-            const point=project(object.altitude,object.azimuth,rotation,safeZoom,pan);
-            if(Math.hypot(point.x-CX,point.y-CY)>RADIUS-12)return null;
-            return <DeepSkyMarker key={object.id} object={object} x={point.x} y={point.y} selected={selectedDeepSkyId===object.id} onSelect={onSelectDeepSky} showLabels={showLabels&&(safeZoom>=1.5||(object.magnitude!==null&&object.magnitude<=6))} nightMode={nightMode}/>;
-          })}
-          {planets.filter(planet=>planet.altitude>=0).map(planet=>{
-            const point=project(planet.altitude,planet.azimuth,rotation,safeZoom,pan);
-            if(Math.hypot(point.x-CX,point.y-CY)>RADIUS-2)return null;
-            return <PlanetMarker key={planet.id} planet={planet} x={point.x} y={point.y} selected={selectedPlanetId===planet.id} onSelect={onSelectPlanet} showLabels={showLabels} nightMode={nightMode}/>;
-          })}
+          {projectedDeepSky.map(object=><DeepSkyMarker key={object.id} object={object} x={object.x} y={object.y} selected={selectedDeepSkyId===object.id} onSelect={onSelectDeepSky} labelPlacement={labels.get(`deep-${object.id}`)||null} showLabels={showLabels} nightMode={nightMode}/>)}
+          {projectedPlanets.map(planet=><PlanetMarker key={planet.id} planet={planet} x={planet.x} y={planet.y} selected={selectedPlanetId===planet.id} onSelect={onSelectPlanet} labelPlacement={labels.get(`planet-${planet.id}`)||null} showLabels={showLabels} nightMode={nightMode}/>)}
         </g>
 
         <g aria-hidden="true">

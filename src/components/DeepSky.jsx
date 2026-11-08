@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Camera, ExternalLink, ImageOff, LoaderCircle, Orbit, RotateCcw, Search, Telescope } from 'lucide-react';
+import { ArrowRight, Camera, ExternalLink, ImageOff, LoaderCircle, Orbit, RotateCcw, Search, Telescope, ZoomIn, ZoomOut } from 'lucide-react';
 import { deepSkyImage } from '../lib/deepSkyImages.js';
 import './DeepSky.css';
 
@@ -9,7 +9,7 @@ const magnitudeText = object => Number.isFinite(object.magnitude)
   ? `${object.magnitude.toFixed(1)} mag${object.magnitudeBand ? ` (${object.magnitudeBand})` : ''}` : 'ไม่มีค่าระบุ';
 const aboveHorizon = object => Number.isFinite(object.altitude) && object.altitude >= 0;
 
-export function DeepSkyMarker({ object, x, y, selected, onSelect, showLabels, nightMode }) {
+export function DeepSkyMarker({ object, x, y, selected, onSelect, showLabels, nightMode, labelPlacement }) {
   const color = nightMode ? '#e4a091' : object.type === 'galaxy' ? '#b99af1' : object.type === 'cluster' ? '#82d7df' : '#f0adcf';
   return <g className="deep-sky-marker" data-deep-sky={object.id} role="button" tabIndex={0}
     aria-label={`${object.name} (${object.catalogId}) · ${categories[object.type]}`} aria-pressed={selected}
@@ -23,7 +23,7 @@ export function DeepSkyMarker({ object, x, y, selected, onSelect, showLabels, ni
         : object.type === 'cluster' ? <><circle cx={x} cy={y} r="6" strokeDasharray="2 2" />{[[0,0],[-2.5,-2],[2,2],[-2,2.5],[2.5,-2]].map(([dx,dy],i) => <circle key={i} cx={x+dx} cy={y+dy} r=".8" fill={color} stroke="none" />)}</>
           : <path d={`M${x} ${y-6}l6 6-6 6-6-6z`} />}
     </g>
-    {(showLabels || selected) && <text x={x+12} y={y-8} fill={color} className="deep-sky-marker-label">{selected ? object.name : object.catalogId}</text>}
+    {(labelPlacement!==null&&(showLabels || selected)) && <text x={labelPlacement?.x??x+12} y={labelPlacement?.y??y-8} textAnchor={labelPlacement?.anchor||'start'} fill={color} className="deep-sky-marker-label">{selected ? object.name : object.catalogId}</text>}
     <circle cx={x} cy={y} r="13" fill="transparent" className="deep-sky-hit" />
   </g>;
 }
@@ -56,16 +56,18 @@ function DeepSkyPhoto({ object }) {
   const photo = deepSkyImage(object);
   const [status, setStatus] = useState('loading');
   const [attempt, setAttempt] = useState(0);
+  const [zoom,setZoom]=useState(1);
   useEffect(() => {
     const timer = setTimeout(() => setStatus(previous => previous === 'loading' ? 'error' : previous), 20000);
     return () => clearTimeout(timer);
   }, [attempt]);
   return <figure className="deep-sky-photo" data-deep-sky-photo={object.id}>
     <div className={`deep-sky-photo-frame ${status}`}>
-      <img key={attempt} src={photo.url} alt={`ภาพสำรวจ DSS2 ของ${object.name} (${object.catalogId}) และบริเวณโดยรอบ`} referrerPolicy="no-referrer" decoding="async"
-        onLoad={() => setStatus('ready')} onError={() => setStatus('error')}/>
+      <div className="deep-sky-photo-scroll" tabIndex={status==='ready'?0:-1} aria-label="ภาพสำรวจ ขยายแล้วเลื่อนดูรายละเอียดได้"><img key={attempt} src={photo.url} alt={`ภาพสำรวจ DSS2 ของ${object.name} (${object.catalogId}) และบริเวณโดยรอบ`} referrerPolicy="no-referrer" decoding="async" style={{width:`${zoom*100}%`,maxWidth:'none'}}
+        onLoad={() => setStatus('ready')} onError={() => setStatus('error')}/></div>
       {status !== 'ready' && <div className="deep-sky-photo-state" role="status">{status === 'loading' ? <><LoaderCircle className="deep-sky-spinner" size={28}/><strong>กำลังโหลดภาพสำรวจจริง…</strong></> : <><ImageOff size={28}/><strong>ยังโหลดภาพสำรวจไม่ได้</strong><span>ลองใหม่เมื่อเชื่อมต่อบริการภาพได้</span><button onClick={() => { setStatus('loading'); setAttempt(value => value + 1); }}><RotateCcw size={14}/> ลองโหลดอีกครั้ง</button></>}</div>}
     </div>
+    <div className="photo-controls deep-sky-photo-controls"><button aria-label="ย่อภาพกาแล็กซี" disabled={status!=='ready'||zoom<=1} onClick={()=>setZoom(v=>Math.max(1,v-.5))}><ZoomOut size={17}/></button><span>{Math.round(zoom*100)}%</span><button aria-label="ขยายภาพกาแล็กซี" disabled={status!=='ready'||zoom>=3} onClick={()=>setZoom(v=>Math.min(3,v+.5))}><ZoomIn size={17}/></button><button aria-label="คืนขนาดภาพกาแล็กซี" disabled={zoom===1} onClick={()=>setZoom(1)}><RotateCcw size={15}/></button></div>
     <figcaption><span><Camera size={13}/> DSS2 color · ขอบเขตภาพ {number(photo.fieldOfView)}°</span><a href={photo.url} target="_blank" rel="noreferrer">เปิดภาพเต็ม <ExternalLink size={12}/></a></figcaption>
     <p className="deep-sky-note">ภาพถ่ายสำรวจผสมสีที่พิกัดของวัตถุ ไม่ใช่ภาพสดหรือสีที่ตาเปล่าเห็นโดยตรง</p>
     <p className="deep-sky-credit">{photo.credit}</p>

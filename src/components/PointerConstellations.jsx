@@ -6,14 +6,14 @@ const finitePoint = point => point && Number.isFinite(point.x) && Number.isFinit
 
 // Labels follow the projected catalog positions. Offsets only separate text;
 // they never change a star position or add lines absent from the catalog.
-function layoutLabels(groups, projectedStars, width, height, selectedGroup, starLabelIds) {
+function layoutLabels(groups, projectedStars, width, height, selectedGroup, starLabelIds, reservedBoxes) {
   const small = width < 500;
   const titleSize = small ? 11 : 12;
   const subtitleSize = small ? 9 : 10;
-  const occupied = projectedStars.filter(star => star.point?.visible).flatMap(star => [
+  const occupied = [...reservedBoxes, ...projectedStars.filter(star => star.point?.visible).flatMap(star => [
     { x:star.point.x - 6, y:star.point.y - 6, width:12, height:12 },
     ...(starLabelIds.has(star.id) ? [{ x:star.point.x + 8, y:star.point.y - 23, width:textWidth(star.name || star.nameEn || '', 11) + 5, height:17 }] : []),
-  ]);
+  ])];
   const placed = [];
   const candidates = groups.map(group => {
     const members = projectedStars.filter(star => group.starIds.includes(star.id) && star.point?.visible);
@@ -38,11 +38,11 @@ function layoutLabels(groups, projectedStars, width, height, selectedGroup, star
   return placed;
 }
 
-export default function PointerConstellations({ projectedStars, constellations, selectedStarId, width, height, starLabelIds, showLabels = true, nightMode = false }) {
+export default function PointerConstellations({ projectedStars, constellations, selectedStarId, width, height, starLabelIds, reservedBoxes = [], showLabels = true, nightMode = false }) {
   const byId = new Map(projectedStars.map(star => [star.id, star]));
   const selectedGroup = byId.get(selectedStarId)?.constellationId;
   const maxSegment = Math.hypot(width, height) * 1.7;
-  const labels = showLabels && width > 100 && height > 80 ? layoutLabels(constellations, projectedStars, width, height, selectedGroup, starLabelIds) : [];
+  const labels = showLabels && width > 100 && height > 80 ? layoutLabels(constellations, projectedStars, width, height, selectedGroup, starLabelIds, reservedBoxes) : [];
 
   return <g className={`pointer-constellation-layer${nightMode ? ' pointer-constellation-night' : ''}`} aria-hidden="true">
     <g className="pointer-constellation-lines">

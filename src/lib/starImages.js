@@ -14,7 +14,7 @@ export function starImage(star) {
   const fieldOfView = star.magnitude < 1 ? 0.5 : 0.3;
   const url = new URL(SURVEY_IMAGE_SERVICE);
   url.search = new URLSearchParams({
-    hips: 'CDS/P/DSS2/color', width: '640', height: '640',
+    hips: 'CDS/P/DSS2/color', width: '1024', height: '1024',
     fov: String(fieldOfView), projection: 'TAN', coordsys: 'icrs',
     ra: String(raDegrees), dec: String(star.dec), rotation: '0', format: 'jpg',
   }).toString();

@@ -11,5 +11,6 @@ import './styles.css';
 import App from './App.jsx';
 import './observatory.css';
 import './skyHome.css';
+import './observatoryPolish.css';
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);
